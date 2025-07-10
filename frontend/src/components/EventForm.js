@@ -126,7 +126,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <TextField
             label="Event Name"
