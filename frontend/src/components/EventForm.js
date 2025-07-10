@@ -17,7 +17,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DesktopDatePicker } from "@mui/x-date-pickers";
 import * as eventService from "../services/eventService";
-import {format,parse} from "date-fns";
+import { format, parse } from "date-fns";
 const EventForm = ({ eventForEdit, addOrEdit }) => {
   const initialFieldValues = {
     eventName: "",
@@ -50,7 +50,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
       }));
     }
   }, [eventForEdit]);
-  
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,15 +66,15 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("🟢 handleSubmit called");
-    
+
     console.log("🔹 Validating...");
     if (!validate()) {
       console.log("❌ Validation failed. Exiting...");
       return;
     }
-    
+
     console.log("✅ Validation passed. Processing event...");
-  
+
     const formattedEvent = {
       _id: values._id,
       title: values.eventName,
@@ -84,9 +84,9 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
       eventType: values.eventType === "other" ? values.customEventType : values.eventType,
       passedOutYear: values.passedOutYear,
     };
-  
+
     console.log("📝 Formatted Event Before FormData:", formattedEvent);
-  
+
     const formData = new FormData();
     Object.keys(formattedEvent).forEach((key) => {
       if (formattedEvent[key] !== null && formattedEvent[key] !== undefined) {
@@ -94,20 +94,20 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         formData.append(key, formattedEvent[key]);
       }
     });
-  
+
     if (file) {
       console.log("📂 Attaching file:", file.name);
       formData.append("attachment", file);
     }
-  
+
     console.log("📤 Final FormData before sending:", Object.fromEntries(formData));
-  
+
     console.log("🚀 Calling addOrEdit function...");
     addOrEdit(formData);
-  
+
     console.log("✅ Submission completed!");
   };
- 
+
   const validate = () => {
     let temp = {};
     temp.eventName = values.eventName ? "" : "This field is required.";
@@ -130,7 +130,11 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <TextField
-            label="Event Name"
+            label={
+              <span>
+                Event Name <span style={{ color: 'red' }}>*</span>
+              </span>
+            }
             variant="outlined"
             name="eventName"
             value={values.eventName}
@@ -141,34 +145,38 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
           />
         </Grid>
         <Grid item xs={12}>
-  <LocalizationProvider dateAdapter={AdapterDateFns}>
-    <DesktopDatePicker
-      label="Event Date"
-      inputFormat="dd/MM/yyyy" // Display in DD/MM/YYYY format
-      value={values.eventDate ? parse(values.eventDate, "yyyy-MM-dd", new Date()) : null} // Parse stored date
-      onChange={(date) => {
-        if (date) {
-          setValues((prev) => ({
-            ...prev,
-            eventDate: format(date, "yyyy-MM-dd"), // Store as YYYY-MM-DD
-          }));
-        }
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          fullWidth
-          error={Boolean(errors.eventDate)}
-          helperText={errors.eventDate}
-        />
-      )}
-    />
-  </LocalizationProvider>
-</Grid>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDatePicker
+              label="Event Date"
+              inputFormat="dd/MM/yyyy" // Display in DD/MM/YYYY format
+              value={values.eventDate ? parse(values.eventDate, "yyyy-MM-dd", new Date()) : null} // Parse stored date
+              onChange={(date) => {
+                if (date) {
+                  setValues((prev) => ({
+                    ...prev,
+                    eventDate: format(date, "yyyy-MM-dd"), // Store as YYYY-MM-DD
+                  }));
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  error={Boolean(errors.eventDate)}
+                  helperText={errors.eventDate}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
 
         <Grid item xs={12}>
           <TextField
-            label="Description"
+            label={
+              <span>
+                Description <span style={{ color: 'red' }}>*</span>
+              </span>
+            }
             variant="outlined"
             name="description"
             value={values.description}
@@ -182,7 +190,11 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         </Grid>
         <Grid item xs={12}>
           <TextField
-            label="Location"
+            label={
+              <span>
+                Location <span style={{ color: 'red' }}>*</span>
+              </span>
+            }
             variant="outlined"
             name="location"
             value={values.location}
@@ -194,7 +206,9 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         </Grid>
         <Grid item xs={12}>
           <FormControl fullWidth variant="outlined" error={Boolean(errors.eventType)}>
-            <InputLabel>Event Type</InputLabel>
+            <InputLabel> <span>
+              Event Type <span style={{ color: 'red' }}>*</span>
+            </span></InputLabel>
             <Select
               label="Event Type"
               name="eventType"
@@ -235,34 +249,34 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
           />
         </Grid>
         <Grid item xs={12}>
-            <Button variant="contained" component="label" fullWidth>
-              <CloudUploadIcon sx={{ mr: 1 }} />
-              Upload Event Image
-              <input type="file" hidden onChange={handleFileChange} />
-            </Button>
-            {file && (
-              <Chip label={file.name} color="primary" sx={{ mt: 1 }} />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              fullWidth
-              sx={{
-                py: 1.5,
-                fontSize: "16px",
-                fontWeight: "bold",
-                textTransform: "none",
-                borderRadius: 2,
-                "&:hover": { backgroundColor: "#1e88e5" },
-              }}
-            >
-              Submit
-            </Button>
-          </Grid>
+          <Button variant="contained" component="label" fullWidth>
+            <CloudUploadIcon sx={{ mr: 1 }} />
+            Upload Event Image
+            <input type="file" hidden onChange={handleFileChange} />
+          </Button>
+          {file && (
+            <Chip label={file.name} color="primary" sx={{ mt: 1 }} />
+          )}
         </Grid>
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            fullWidth
+            sx={{
+              py: 1.5,
+              fontSize: "16px",
+              fontWeight: "bold",
+              textTransform: "none",
+              borderRadius: 2,
+              "&:hover": { backgroundColor: "#1e88e5" },
+            }}
+          >
+            Submit
+          </Button>
+        </Grid>
+      </Grid>
     </form>
   );
 };
