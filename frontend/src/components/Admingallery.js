@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Close, Delete, ArrowBack, ArrowForward } from "@mui/icons-material";
 import axios from "axios";
+import AdminNavBar from "./AdminNavBar";
 
 const API_URL = "http://localhost:5000/api/gallery";
 
@@ -71,7 +72,7 @@ function AdminGallery() {
       }
     }, 100); // Small delay to prevent album opening while deleting
   };
-  
+
   const confirmDelete = (type, target, event) => {
     if (event) event.stopPropagation(); // Prevent album from opening
     setDeleteTarget({ type, target });
@@ -101,15 +102,20 @@ function AdminGallery() {
 
   return (
     <Box sx={{ textAlign: "center", p: 2 }}>
-      <Typography variant="h5" sx={{
+      <><AdminNavBar /></>
+      <Box
+        sx={{
           background: "linear-gradient(to right, #4a00e0, #8e2de2)",
-          padding: "12px",
+          padding: "16px", // Increased padding for better spacing
           borderRadius: "8px",
           textAlign: "center",
           mb: 3,
-        }}>
-        Admin Photo Gallery
-      </Typography>
+        }}
+      >
+        <Typography variant="h3" fontWeight="bold" color="white">
+          Admin Photo Gallery
+        </Typography>
+      </Box>
 
       <Tabs value={tabIndex} onChange={(e, newIndex) => setTabIndex(newIndex)} centered>
         <Tab label="All Photos" />
@@ -149,12 +155,12 @@ function AdminGallery() {
           {albums.map((album) => (
             <Grid item key={album.albumName} xs={12} sm={4} sx={{ position: "relative" }}>
               <Card sx={{ cursor: "pointer" }} onClick={() => openAlbum(album.albumName)}>
-              <IconButton
-            sx={{ position: "absolute", top: 5, right: 5, zIndex: 1 }}
-            size="small"
-            onClick={(event) => confirmDelete("album", album.albumName, event)}
-          >
-            <Delete fontSize="small" />
+                <IconButton
+                  sx={{ position: "absolute", top: 5, right: 5, zIndex: 1 }}
+                  size="small"
+                  onClick={(event) => confirmDelete("album", album.albumName, event)}
+                >
+                  <Delete fontSize="small" />
                 </IconButton>
                 <CardMedia
                   component="img"
@@ -172,28 +178,28 @@ function AdminGallery() {
           ))}
         </Grid>
       ))}
-        <Dialog 
-        open={deleteConfirmOpen} 
-        onClose={() => setDeleteConfirmOpen(false)} 
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
         sx={{ zIndex: 1300 }} // Ensure it appears above other elements
-        >
+      >
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-            <Typography>
+          <Typography>
             {deleteTarget?.type === "photo"
-                ? "Are you sure you want to delete this photo?"
-                : `Are you sure you want to delete the album "${deleteTarget?.target}"?`}
-            </Typography>
+              ? "Are you sure you want to delete this photo?"
+              : `Are you sure you want to delete the album "${deleteTarget?.target}"?`}
+          </Typography>
         </DialogContent>
         <DialogActions>
-            <Button onClick={() => setDeleteConfirmOpen(false)} color="secondary">
+          <Button onClick={() => setDeleteConfirmOpen(false)} color="secondary">
             Cancel
-            </Button>
-            <Button onClick={handleDelete} color="error">
+          </Button>
+          <Button onClick={handleDelete} color="error">
             Delete
-            </Button>
+          </Button>
         </DialogActions>
-        </Dialog>
+      </Dialog>
 
       <Dialog open={!!selectedAlbum} onClose={() => setSelectedAlbum(null)} maxWidth="md">
         <DialogContent sx={{ position: "relative", p: 2, textAlign: "center" }}>
