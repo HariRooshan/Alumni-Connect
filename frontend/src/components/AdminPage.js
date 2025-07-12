@@ -12,6 +12,7 @@ import { styled } from "@mui/material/styles";
 import EventForm from "./EventForm";
 import EventTable from "./EventTable";
 import * as eventService from "../services/eventService";
+import AdminNavBar from "./AdminNavBar";
 
 // Create a custom styled button with enhanced UI
 const CustomButton = styled(Button)(({ theme }) => ({
@@ -78,7 +79,7 @@ const AdminPage = () => {
   };
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <><><AdminNavBar /></><Paper sx={{ p: 3 }}>
       {/* Header with Larger Text */}
       <Box
         sx={{
@@ -101,7 +102,7 @@ const AdminPage = () => {
           onClick={() => {
             setOpenPopup(true);
             setCurrentEvent(null);
-          }}
+          } }
           sx={{
             padding: "12px 24px", // Larger button padding
             fontSize: "1.2rem", // Increased font size
@@ -121,7 +122,7 @@ const AdminPage = () => {
           <EventForm eventForEdit={recordForEdit} addOrEdit={addOrEditEvent} />
         </DialogContent>
       </Dialog>
-    </Paper>
+    </Paper></>
   );
 };
 
