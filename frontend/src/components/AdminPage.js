@@ -79,7 +79,7 @@ const AdminPage = () => {
   };
 
   return (
-    <><><AdminNavBar /></><Paper sx={{ p: 3 }}>
+    <><><AdminNavBar /></><Paper sx={{ p: 3 }} elevation={0}>
       {/* Header with Larger Text */}
       <Box
         sx={{
