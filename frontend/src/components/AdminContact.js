@@ -4,6 +4,7 @@ import {
   Card, CardContent, CardActions, Typography, Button, Container, 
   Alert, Stack, Box, TextField 
 } from "@mui/material";
+import AdminNavBar from "./AdminNavBar";
 
 const AdminContact = () => {
   const [contactDetails, setContactDetails] = useState({
@@ -45,7 +46,9 @@ const AdminContact = () => {
   };
 
   return (
+    
     <Container maxWidth="md" sx={{ mt: 4 }}>
+      <><AdminNavBar /></>
       {/* Gradient Header */}
       <Box
         sx={{

@@ -4,6 +4,7 @@ import {
   Card, CardContent, CardActions, Typography, Button, Container, 
   Alert, Stack, Box, TextField 
 } from "@mui/material";
+import AdminNavBar from "./AdminNavBar";
 
 const AdminApproval = () => {
   const [pendingAlumni, setPendingAlumni] = useState([]);
@@ -56,6 +57,7 @@ const AdminApproval = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       {/* Gradient Header */}
+      <><AdminNavBar /></>
       <Box
         sx={{
           background: "linear-gradient(to right, #4a00e0, #8e2de2)",
@@ -122,9 +124,11 @@ const AdminApproval = () => {
 
       {/* Alumni List */}
       {pendingAlumni.length === 0 ? (
-        <Typography textAlign="center" color="textSecondary">
-          No pending alumni registrations found.
-        </Typography>
+       <Box sx={{ mb: 6 }}>
+  <Typography textAlign="center" color="textSecondary">
+    No pending alumni registrations found.
+  </Typography>
+</Box>
       ) : (
         <Stack spacing={3}>
           {pendingAlumni.map((alumni) => (
