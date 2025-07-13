@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { 
   Container, Grid, Card, CardContent, Typography, Button, 
-  AppBar, Toolbar, Avatar, Snackbar, Alert 
+  AppBar, Toolbar, Avatar, Snackbar, Alert, IconButton
 } from "@mui/material";
-import { Event, PhotoLibrary, People, ContactMail } from "@mui/icons-material";
+import { Event, PhotoLibrary, People, ContactMail, Home as HomeIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // Import for decoding token
 
@@ -36,7 +36,24 @@ export default function AdminHome() {
   }, [navigate]);
 
   return (
+    
     <Container maxWidth="lg" sx={{ mt: 4, textAlign: "center" }}>
+       <IconButton
+            onClick={() => navigate("/")}
+            sx={{
+              background: "linear-gradient(to right, #4a00e0, #8e2de2)",
+              color: "white",
+              borderRadius: 2,
+              p: 1.2,
+              marginLeft: "94%",
+              marginBottom: "1%",
+              "&:hover": {
+                background: "linear-gradient(to right, #3a00c0, #6e1cd2)",
+              },
+            }}
+          >
+            <HomeIcon fontSize="large" />
+          </IconButton>
       {/* Top Navigation Bar */}
       <AppBar 
         position="static" 
@@ -55,11 +72,13 @@ export default function AdminHome() {
           <Avatar sx={{ bgcolor: "white", color: "#1976d2", fontWeight: "bold" }}>
             A
           </Avatar>
+          
         </Toolbar>
+        
       </AppBar>
 
       {/* Dashboard Cards */}
-      <Grid container spacing={3} justifyContent="center">
+      <Grid container spacing={3} justifyContent="center" alignItems="stretch" sx={{ '& > .MuiGrid-item': { pt: 9 } }}>
         {[
           {
             title: "Manage Events",
@@ -77,24 +96,24 @@ export default function AdminHome() {
           },
           {
             title: "Manage Alumni",
-            description: "Keep track of alumni and update their profiles. This section includes verification of alumni information, approving or rejecting alumni requests, and handling alumni-related queries.",
+            description: "Keep track of alumni and update their profiles.",
             icon: <People sx={{ fontSize: 60, color: "#6a11cb" }} />,
             buttonText: "Go to Alumni",
             path: "/admin-approval",
           },
           {
-            title: "Manage Contact Details",
-            description: "Maintain the contact details of the admin. Update email addresses, phone numbers, and office details.",
+            title: "Manage Contact",
+            description: "Maintain the contact details of the admin.",
             icon: <ContactMail sx={{ fontSize: 60, color: "#6a11cb" }} />,
             buttonText: "Go to Contact Updation",
             path: "/admin-contact",
           },
         ].map((card, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid item xs={12} sm={6} md={3} key={index} sx={{ paddingBottom : "5%" }}>
             <Card
               elevation={4}
               sx={{
-                minHeight: 320,
+                height: "80%",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -124,11 +143,12 @@ export default function AdminHome() {
                 sx={{
                   backgroundColor: "#6a11cb",
                   "&:hover": { backgroundColor: "#4b0082" },
-                  padding: "10px 20px",
+                  p : "7%",
                   fontWeight: "bold",
                   width: "80%",
                   alignSelf: "center",
                   mb: 2,
+                  minHeight: "15%",
                 }}
                 onClick={() => navigate(card.path)}
               >
