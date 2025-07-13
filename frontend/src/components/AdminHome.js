@@ -37,7 +37,7 @@ export default function AdminHome() {
 
   return (
     
-    <Container maxWidth="lg" sx={{ mt: 4, textAlign: "center" }}>
+    <Container maxWidth="lg" sx={{mt : 2, textAlign: "center" }}>
        <IconButton
             onClick={() => navigate("/")}
             sx={{
@@ -59,10 +59,9 @@ export default function AdminHome() {
         position="static" 
         sx={{ 
           background: "linear-gradient(to right, #6a11cb, #2575fc)", 
-          height: "90px", 
+          height: "80px", 
           display: "flex", 
-          justifyContent: "center", 
-          mb: 4 
+          justifyContent: "center"
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -109,11 +108,11 @@ export default function AdminHome() {
             path: "/admin-contact",
           },
         ].map((card, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index} sx={{ paddingBottom : "5%" }}>
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <Card
               elevation={4}
               sx={{
-                height: "80%",
+                height: "83%",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
