@@ -41,9 +41,6 @@ app.use('/allPhotos', express.static('uploads/allPhotos'));
 app.use('/albums', express.static('uploads/albums'));
 app.use("/api/events", eventRoutes);
 
-
-
-// my updates - mentorship
 app.use("/api/users", userRoutes);
 app.use("/api/connections",connRoutes)
 app.use("/api/mail",emailRoutes);
