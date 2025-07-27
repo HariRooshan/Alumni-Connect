@@ -135,10 +135,28 @@ const EventTable = ({ events, handleEdit, handleDelete }) => {
                   active={orderBy === headCell.id}
                   direction={orderBy === headCell.id ? order : "asc"}
                   onClick={() => handleRequestSort(headCell.id)}
-                  sx={{ color: "#fff", "&.Mui-active": { color: "#fff" } }}
+                  sx={{
+                    color: "#fff",
+                    "&.Mui-active": {
+                      color: "#fff",
+                      "& .MuiTableSortLabel-icon": {
+                        color: "#fff",
+                      },
+                    },
+                    "&:hover": {
+                      color: "#ffeb3b",
+                      "& .MuiTableSortLabel-icon": {
+                        color: "#ffeb3b",
+                      },
+                    },
+                    "& .MuiTableSortLabel-icon": {
+                      color: "#fff",
+                    },
+                  }}
                 >
                   {headCell.label}
                 </TableSortLabel>
+
               </TableCell>
             ))}
             <TableCell>Actions</TableCell>
