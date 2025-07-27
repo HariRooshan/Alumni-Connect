@@ -65,14 +65,14 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
 
     if (!selectedFile) return;
 
-    const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/jpg"];
     const maxSize = 5 * 1024 * 1024; 
 
     // Type validation
     if (!validTypes.includes(selectedFile.type)) {
       setErrors((prev) => ({
         ...prev,
-        file: "Only PDF, JPEG, PNG, or WebP files are allowed.",
+        file: "Only PDF, JPEG, JPG, PNG, or WebP files are allowed.",
       }));
       setFile(null);
       return;
