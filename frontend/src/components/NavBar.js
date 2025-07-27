@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Button, IconButton, Menu, MenuItem, Drawer
 import { AccountCircle, Menu as MenuIcon } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const token = localStorage.getItem("token");
@@ -29,7 +29,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
-    window.location.reload(); 
+    window.location.reload();
   };
 
   const navLinks = [
@@ -39,7 +39,7 @@ const Navbar = () => {
     { text: "Search Alumni", path: "/search-alumni" },
     { text: "Mentorship", path: "/mentorship" },
     { text: "Contact Us", path: "/contact-us" },
-    
+
   ];
 
   return (
@@ -63,6 +63,17 @@ const Navbar = () => {
                 {link.text}
               </Button>
             ))}
+
+            {role === "Admin" && (
+              <Button
+                color="inherit"
+                component={Link}
+                to="/admin-home"
+                sx={{ display: { xs: "none", md: "inline-flex" } }}
+              >
+                Dashboard
+              </Button>
+            )}
 
             {!token && <Button color="inherit" component={Link} to="/login">Login</Button>}
 
