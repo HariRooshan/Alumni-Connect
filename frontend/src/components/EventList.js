@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { 
-  Container, Typography, Button, Card, CardContent, 
-  Dialog, DialogTitle, DialogContent, Grid, CircularProgress, 
-  TextField, MenuItem, Select, FormControl, InputLabel 
+import {
+  Container, Typography, Button, Card, CardContent,
+  Dialog, DialogTitle, DialogContent, Grid, CircularProgress,
+  TextField, MenuItem, Select, FormControl, InputLabel, Box
 } from "@mui/material";
 import axios from "axios";
-
-
 
 const EventList = () => {
   const [events, setEvents] = useState([]);
@@ -15,8 +13,7 @@ const EventList = () => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // Upcoming, Completed, or All
+  const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date-newest");
 
   useEffect(() => {
@@ -42,11 +39,8 @@ const EventList = () => {
 
   const filteredEvents = events
     .filter(event => event.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    .filter(event => 
+    .filter(event =>
       eventTypeFilter ? event.eventType.toLowerCase() === eventTypeFilter.toLowerCase() : true
-    )
-    .filter(event => 
-      yearFilter ? event.passedOutYear?.toString() === yearFilter : true
     )
     .filter(event => {
       const eventDate = new Date(event.date);
@@ -62,109 +56,139 @@ const EventList = () => {
       return 0;
     });
 
-  if (loading) return <CircularProgress sx={{ display: "block", mx: "auto", mt: 4 }} />;
+  if (loading) return <CircularProgress sx={{ display: "block", mx: "auto", mt: 6 }} />;
 
   return (
-    <Container sx={{ mt: 4, textAlign: "center" }}>
-      <Typography variant="h3" fontWeight="bold" gutterBottom color="primary">
-        🎉 Upcoming Events
+    <Container maxWidth="lg" sx={{ mt: 6, pb: 8 }}>
+      <Typography variant="h4" fontWeight="bold" textAlign="center" color="primary" gutterBottom>
+        🎉 Explore Our Events
       </Typography>
 
-      {/* Search, Filter & Sort Controls */}
-      <Grid container spacing={2} justifyContent="center" sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
-          <TextField 
-            fullWidth 
-            label="🔍 Search Events" 
-            variant="outlined" 
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <FormControl fullWidth>
-            <InputLabel>🎭 Filter by Type</InputLabel>
-            <Select value={eventTypeFilter} onChange={(e) => setEventTypeFilter(e.target.value)}>
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="Workshop">Workshop</MenuItem>
-              <MenuItem value="Seminar">Seminar</MenuItem>
-              <MenuItem value="Meetup">Meetup</MenuItem>
-              <MenuItem value="Webinar">Webinar</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <FormControl fullWidth>
-            <InputLabel>📆 Event Status</InputLabel>
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="upcoming">Upcoming</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-      </Grid>
-
-      {/* Grid Layout - 2 Events Per Row */}
-      <Grid container spacing={4} justifyContent="center" sx={{pb:10,pt:5}}>
-        {filteredEvents.map((event) => (
-          <Grid item xs={12} sm={6} key={event._id}>
-            <Card 
-              sx={{ 
-                height: "100%", borderRadius: "12px", 
-                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", 
-                transition: "transform 0.2s ease-in-out",
-                "&:hover": { transform: "scale(1.03)" }
-              }}
-            >
-              <CardContent sx={{ textAlign: "left", padding: "20px" }}>
-                <Typography variant="h5" fontWeight="bold">{event.title}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  📅 {new Date(event.date).toLocaleDateString()} | 📍 {event.location}
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  sx={{ mt: 2, backgroundColor: "#1976d2", "&:hover": { backgroundColor: "#125ea7" }}}
-                  onClick={() => handleOpenPopup(event)}
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
+      {/* Filters Section */}
+      <Box
+        sx={{
+          backgroundColor: "#ffffffff",
+          p: 3,
+          borderRadius: 2,
+          mb: 5
+        }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="🔍 Search by Title"
+              variant="outlined"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </Grid>
-        ))}
-      </Grid>
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>🎭 Filter by Type</InputLabel>
+              <Select
+                value={eventTypeFilter}
+                label="🎭 Filter by Type"
+                onChange={(e) => setEventTypeFilter(e.target.value)}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Workshop">Workshop</MenuItem>
+                <MenuItem value="Seminar">Seminar</MenuItem>
+                <MenuItem value="Meetup">Meetup</MenuItem>
+                <MenuItem value="Webinar">Webinar</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <FormControl fullWidth>
+              <InputLabel>📆 Event Status</InputLabel>
+              <Select
+                value={statusFilter}
+                label="📆 Event Status"
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="upcoming">Upcoming</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Box>
 
+     {/* Event Cards */}
+      {filteredEvents.length === 0 ? (
+        <Typography variant="h6" align="center" color="text.secondary" sx={{ mt: 8 }}>
+          📭 No events found.
+        </Typography>
+      ) : (
+        <Grid container spacing={4}>
+          {filteredEvents.map((event) => (
+            <Grid item xs={12} sm={6} md={4} key={event._id}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  transition: "all 0.3s ease",
+                  "&:hover": { transform: "scale(1.02)", boxShadow: 6 }
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {event.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    📅 {new Date(event.date).toLocaleDateString()}<br />
+                    📍 {event.location}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    sx={{ mt: 2, borderRadius: 2 }}
+                    onClick={() => handleOpenPopup(event)}
+                  >
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {/* Popup Dialog */}
       <Dialog open={open} onClose={handleClosePopup} fullWidth maxWidth="sm">
         {selectedEvent && (
           <>
-            <DialogTitle sx={{ fontSize: "24px", fontWeight: "bold", textAlign: "center", color: "primary.main" }}>
+            <DialogTitle sx={{ fontWeight: "bold", color: "primary.main", textAlign: "center" }}>
               {selectedEvent.title}
             </DialogTitle>
-            <DialogContent sx={{ padding: "20px", textAlign: "center" }}>
+            <DialogContent sx={{ textAlign: "center", pb: 3 }}>
               {selectedEvent.attachment && (
-                <img 
-                  src={`http://localhost:5000${selectedEvent.attachment}`} 
-                  alt={selectedEvent.title} 
-                  style={{ width: "100%", cursor: "pointer", borderRadius: "8px" }} 
+                <img
+                  src={`http://localhost:5000${selectedEvent.attachment}`}
+                  alt={selectedEvent.title}
+                  style={{ width: "100%", borderRadius: 8, marginBottom: 16 }}
                   onClick={() => window.open(`http://localhost:5000${selectedEvent.attachment}`, "_blank")}
                 />
               )}
-              <Typography variant="body1" sx={{ fontSize: "16px", color: "text.secondary", mb: 2 }}>
+              <Typography variant="body1" sx={{ mb: 2 }}>
                 {selectedEvent.description}
               </Typography>
               <Typography variant="body2" fontWeight="bold">
                 📅 {new Date(selectedEvent.date).toLocaleDateString()} | 📍 {selectedEvent.location}
               </Typography>
-              <Typography variant="body2">
-                <strong>Event Type:</strong> {selectedEvent.eventType}
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                🎭 <strong>Type:</strong> {selectedEvent.eventType}
               </Typography>
-              <Typography variant="body2">
-                <strong>Passed Out Year:</strong> {selectedEvent.passedOutYear || "Any"}
-              </Typography>
-              <Typography variant="h6" color="primary">📞 For Booking Contact Us</Typography>
-              <Typography variant="body2"><strong>Phone:</strong> 9000000000</Typography>
-              <Typography variant="body2"><strong>Email:</strong> alumni.events@example.com</Typography>
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h6" color="primary">📞 Contact</Typography>
+                <Typography variant="body2"><strong>Phone:</strong> 9000000000</Typography>
+                <Typography variant="body2"><strong>Email:</strong> alumni.events@example.com</Typography>
+              </Box>
             </DialogContent>
           </>
         )}
