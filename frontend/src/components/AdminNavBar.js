@@ -44,7 +44,7 @@ const AdminNavBar = () => {
       <Box
         sx={{
           background: 'linear-gradient(to right, #4a00e0, #8e2de2)',
-          p: 0.7,
+          p: 0,
           borderRadius: '20%',
         }}
       >
