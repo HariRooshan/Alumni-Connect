@@ -23,7 +23,7 @@ exports.registerAlumni = async (req, res) => {
   } = req.body;
 
   // Validate required fields
-  if (!rollNumber || !email || !name || !yearOfGraduation || !programStudied || !linkedinUrl || !job || !sector || !higherStudies) {
+  if (!email || !name || !yearOfGraduation || !programStudied || !linkedinUrl || !job || !sector || !higherStudies) {
     return res.status(400).send("All fields are required.");
   }
 
@@ -51,10 +51,6 @@ exports.registerAlumni = async (req, res) => {
     const existingAlumni = await Alumni.findOne({ email });
     if (existingAlumni) {
       return res.status(400).send("Alumni details already registered.");
-    }
-    const existingRollNo = await Alumni.findOne({ rollNumber });
-    if (existingRollNo) {
-      return res.status(400).send("Alumni details already registered, please check your Roll Number!");
     }
 
     // Update name in userCredentials collection
