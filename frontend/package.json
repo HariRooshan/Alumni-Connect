@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
     "date-fns": "^2.29.3",
+    "file-saver": "^2.0.5",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "jwt-decode": "^4.0.0",
@@ -25,7 +26,8 @@
     "react-scripts": "5.0.1",
     "socket.io-client": "^4.8.1",
     "swiper": "^11.2.5",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
