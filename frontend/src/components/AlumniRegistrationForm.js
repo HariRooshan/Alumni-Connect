@@ -114,7 +114,7 @@ const AlumniRegistration = () => {
             <Grid item xs={12} sm={4}>
               <TextField label="Email" type="email" name="email" value={formData.email} onChange={handleChange} fullWidth required sx={{ mb: 3 }} />
               <TextField label="Name" type="text" name="name" value={formData.name} onChange={handleChange} fullWidth required sx={{ mb: 3 }} />
-              <TextField label="Roll Number" type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} fullWidth required sx={{ mb: 3 }} />
+              <TextField label="Roll Number" type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} fullWidth sx={{ mb: 3 }} />
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField label="Year of Graduation" type="number" name="yearOfGraduation" value={formData.yearOfGraduation} onChange={handleChange} fullWidth required sx={{ mb: 3 }} />
