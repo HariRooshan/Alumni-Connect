@@ -5,6 +5,7 @@ const path = require("path");
 
 const uploadDir = path.join(__dirname, "..", "uploads");
 
+// Remove unverified users whose OTP has expired
 const cleanupExpiredUsers = async () => {
   try {
     const expiredUsers = await User2.find({ isVerified: false, otpExpiry: { $lt: Date.now() } });
@@ -17,6 +18,7 @@ const cleanupExpiredUsers = async () => {
   }
 };
 
+// Remove events older than 5 years and delete their attachments
 const cleanupOldEvents = async () => {
   try {
     const fiveYearsAgo = new Date();
@@ -42,11 +44,14 @@ const cleanupOldEvents = async () => {
   }
 };
 
+// Run cleanup tasks every 48 hours
 setInterval(async () => {
   console.log("🧹 Running cleanup tasks...");
   await cleanupExpiredUsers();
   await cleanupOldEvents();
 }, 48 * 60 * 60 * 1000); 
+
+// Run once immediately on startup
 cleanupExpiredUsers();
 cleanupOldEvents();
 
