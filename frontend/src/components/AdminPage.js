@@ -107,7 +107,7 @@ const AdminPage = () => {
   return (
     <>
       <AdminNavBar />
-      <Paper sx={{ p: 3 }} elevation={0}>
+      <Paper sx={{ p: 1, pb:5 }} elevation={0}>
         {/* Header */}
         <Box
           sx={{
@@ -115,16 +115,16 @@ const AdminPage = () => {
             padding: "16px",
             borderRadius: "8px",
             textAlign: "center",
-            mb: 3,
+            mb: 2,
           }}
         >
-          <Typography variant="h3" fontWeight="bold" color="white">
+          <Typography variant="h4" fontWeight="bold" color="white">
             Admin - Manage Alumni Events
           </Typography>
         </Box>
 
-        {/* Add Event Button */}
-        <Box sx={{ textAlign: "center" }}>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+          {/* Add Event Button */}
           <CustomButton
             color="primary"
             onClick={() => {
@@ -139,10 +139,8 @@ const AdminPage = () => {
           >
             Add Event
           </CustomButton>
-        </Box>
 
-        {/* Download Button */}
-        <Box sx={{ textAlign: "center" }}>
+          {/* Download Button */}
           <CustomButton
             color="secondary"
             onClick={() => setDateDialogOpen(true)}
