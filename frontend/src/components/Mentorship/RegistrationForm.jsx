@@ -21,7 +21,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Navbar from "./Navbar";
 
 const RegistrationForm = () => {
-  // console.log(sessionStorage);
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email:sessionStorage.getItem("email"),
