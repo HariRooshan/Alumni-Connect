@@ -19,7 +19,9 @@ exports.registerAlumni = async (req, res) => {
     institutionName, 
     degreePursued, 
     specialization, 
-    yearOfCompletion 
+    yearOfCompletion ,
+    currentCompany,
+    companyLocation
   } = req.body;
 
   // Validate required fields
@@ -71,6 +73,9 @@ exports.registerAlumni = async (req, res) => {
       degreePursued: higherStudies === "Yes" ? degreePursued : "",
       specialization: higherStudies === "Yes" ? specialization : "",
       yearOfCompletion: higherStudies === "Yes" ? yearOfCompletion : "",
+      companyLocation: companyLocation || "",
+      currentCompany: currentCompany || "",
+      
       approval_status: "pending",
     });
 
@@ -119,6 +124,8 @@ exports.getAlumniProfile = async (req, res) => {
         approval_status: 1,
         createdAt: 1,
         updatedAt: 1,
+        companyLocation: 1,
+        currentCompany: 1,
       }
     );
 
@@ -185,18 +192,48 @@ exports.updateAlumniProfile = async (req, res) => {
 // Search alumni (or return all if no filters are provided)
 exports.searchAlumni = async (req, res) => {
   try {
-    const { name, yearOfGraduation, sector, higherStudies, sortOrder } = req.query;
+    const { 
+      name, 
+      yearOfGraduation, 
+      sector, 
+      programStudied, 
+      higherStudies, 
+      sortOrder, 
+      location, 
+      customLocation, 
+      company, 
+      customCompany 
+    } = req.query;
 
-    // Construct query dynamically
     const query = {};
-    if (name) query.name = new RegExp(name, "i"); // Case-insensitive search
+
+    if (name) query.name = new RegExp(name, "i");
     if (yearOfGraduation) query.yearOfGraduation = yearOfGraduation;
     if (sector) query.sector = new RegExp(sector, "i");
-    if (higherStudies) query.higherStudies = higherStudies === "Yes"; // Convert to boolean
+    if (higherStudies) query.higherStudies = higherStudies;
 
-    // Fetch only required fields with optional sorting
-    let alumni = await Alumni.find(query, "rollNumber name email yearOfGraduation linkedinUrl job sector higherStudies institutionName").sort(
-      sortOrder === "asc" ? { yearOfGraduation: 1 } : sortOrder === "desc" ? { yearOfGraduation: -1 } : {}
+    // ✅ Case-insensitive check
+    if (location?.toLowerCase() === "other" && customLocation) {
+      query.companyLocation = new RegExp(customLocation.trim(), "i");
+    } else if (location) {
+      query.companyLocation = new RegExp(location.trim(), "i");
+    }
+
+    if (company?.toLowerCase() === "other" && customCompany) {
+      query.currentCompany = new RegExp(customCompany.trim(), "i");
+    } else if (company) {
+      query.currentCompany = new RegExp(company.trim(), "i");
+    }
+
+    const alumni = await Alumni.find(
+      query,
+      "rollNumber name email programStudied yearOfGraduation sector higherStudies institutionName companyLocation currentCompany linkedinUrl job"
+    ).sort(
+      sortOrder === "asc"
+        ? { yearOfGraduation: 1 }
+        : sortOrder === "desc"
+        ? { yearOfGraduation: -1 }
+        : {}
     );
 
     res.json(alumni);
@@ -205,6 +242,3 @@ exports.searchAlumni = async (req, res) => {
     res.status(500).json({ message: "Error fetching alumni data", error });
   }
 };
-
-
-
