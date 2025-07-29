@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, verifyOTP, login, forgotPassword, resetPassword,sendEmail,checkUserExists  } = require("../controllers/authController");
+const { signup, verifyOTP, login, forgotPassword, resetPassword,sendEmail,checkUserExists,checkUserExists2  } = require("../controllers/authController");
 
 const router = express.Router();
 
@@ -11,5 +11,6 @@ router.post("/reset-password", resetPassword);
 router.post("/send-email", sendEmail);  
 // new
 router.post("/check-user", checkUserExists);
+router.post("/check-user2",checkUserExists2)
 
 module.exports = router;

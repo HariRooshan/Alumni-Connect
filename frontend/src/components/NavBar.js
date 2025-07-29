@@ -28,6 +28,7 @@ const Navbar = () => {
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
   const handleLogout = () => {
     localStorage.removeItem("token");
+    sessionStorage.clear();
     navigate("/");
     window.location.reload();
   };

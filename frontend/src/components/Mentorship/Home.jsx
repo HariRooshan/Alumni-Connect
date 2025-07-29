@@ -1,4 +1,5 @@
 import React from "react";
+import Navbar from "../NavBar";
 import {
   AppBar,
   Toolbar,
@@ -50,7 +51,8 @@ const MentorshipHome = () => {
   return (
     <>
     <ThemeProvider theme={theme}>
-      <AppBar position="static" sx={{ background: "linear-gradient(to right, #4a00e0, #8e2de2)" }}>
+      <Navbar/>
+      {/* <AppBar position="static" sx={{ background: "linear-gradient(to right, #4a00e0, #8e2de2)" }}>
         <Toolbar>
           { <img 
             src={Logo} 
@@ -70,7 +72,7 @@ const MentorshipHome = () => {
             Mentorship
           </Button>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       { isParentRoute && (
       <Container sx={{ marginTop: "50px" }}>

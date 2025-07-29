@@ -1,11 +1,100 @@
-import React from "react";
+import React,{useState} from "react";
 import { AppBar, Toolbar, Typography, Button, Container, Grid, Box, Paper } from "@mui/material";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import Navbar from "./Navbar";
+import Navbar from "../NavBar";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+
 
 function MentorshipGuidelines() {
   // const location = useLocation();
   // const isParentRoute = location.pathname === "/mentorship-home"; // Check if on the parent `/mentorship` route
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  if(!token){
+    console.log("g=ehldhjcn");
+  }
+  const decodedToken = jwtDecode(token);
+  const [alert, setAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success"); // Decode safely
+  let EMAIL_ID = decodedToken.email; // Extract email
+  console.log("User Email:", EMAIL_ID);
+  let userRole = decodedToken.role;
+  // const fetchMemberCount = async () => {
+  //   try{
+  //     const response = await fetch("http://localhost:5000/api/users/getUserByEmail");
+  //     if(response.status === 404){
+  //       console.log("Error 404 : No data found");
+  //     }
+  //     const result = await response.json();
+  //     setMentorCount();
+  //     setMenteeCount(result.menteeCount);
+  //     setTotalUsers(result.totalUsers);
+  //   } catch (error) {
+  //     console.error("Error fetching user counts:", error);
+  //   }
+  // }
+  const check_user = async () => {
+  try {
+    if (!EMAIL_ID) {
+      console.error("EMAIL_ID is undefined.");
+      return;
+    }
+    console.log("Inside:",EMAIL_ID);
+    const response = await fetch("http://localhost:5000/api/auth/check-user2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: EMAIL_ID }),
+    });
+    console.log(response);
+    if (response.status < 400) {
+
+      const data = await response.json();
+
+      const user = data.user;
+      const fullName = user.firstName + " " + user.lastName;
+      const isAdminOrMentor = user.role !== "user";
+
+      const userSession = {
+        name: isAdminOrMentor ? fullName : user.name,
+        email: user.email,
+        picture: isAdminOrMentor ? user.photo : user.picture,
+        role: user.role || "user",
+        id: user._id,
+      };
+
+      // ✅ Store session
+      sessionStorage.setItem("user", JSON.stringify(userSession));
+      sessionStorage.setItem("email", user.email);
+      sessionStorage.setItem("name", userSession.name);
+      sessionStorage.setItem("picture", userSession.picture);
+      sessionStorage.setItem("role", user.role || "user");
+      sessionStorage.setItem("id", user._id);
+
+      // ✅ Set alerts
+      setAlert(true);
+      setAlertType("success");
+      setAlertMessage(`Login successful: Welcome ${userSession.name}`);
+
+      setTimeout(() => {
+        navigate("/mentorship/main");
+      }, 1500);
+    } else {
+      // ❌ User not found in DB
+      setTimeout(() => {
+        navigate("/mentorship/dashboard");
+      }, 1500);
+    }
+  } catch (error) {
+    console.error("Error checking user:", error);
+    setAlert(true);
+    setAlertType("error");
+    setAlertMessage("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <>
@@ -80,18 +169,17 @@ function MentorshipGuidelines() {
           </Box>
 
           {/* Call-to-Action Button */}
-          <Box sx={{ marginTop: "40px", textAlign: "center",pb:5 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              size="large" 
-              component={Link} 
-              to="/mentorship/login" 
-              style={{ background: "linear-gradient(90deg, #1a237e, #283593)" }}
-            >
-              Join the Program
-            </Button>
-          </Box>
+          <Box sx={{ marginTop: "40px", textAlign: "center", pb: 5 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={check_user}
+            style={{ background: "linear-gradient(90deg, #1a237e, #283593)" }}
+          >
+            Join the Program
+          </Button>
+        </Box>
         </Container>
       )}
 
