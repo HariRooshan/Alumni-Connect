@@ -130,6 +130,7 @@ const AdminPage = () => {
             onClick={() => {
               setOpenPopup(true);
               setCurrentEvent(null);
+              setRecordForEdit(null); 
             }}
             sx={{
               padding: "12px 24px",

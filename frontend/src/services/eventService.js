@@ -117,6 +117,17 @@ export async function deleteEvent(eventId) {
   }
 }
 
+export async function deleteEventAttachment(eventId) {
+  const resp = await fetch(`${BASE_URL}/${eventId}/attachment`, {
+    method: "DELETE"
+  });
+  if (!resp.ok) {
+    console.error("Failed to delete attachment", await resp.text());
+    throw new Error("Could not delete attachment");
+  }
+  return await resp.json();
+}
+
 export async function getAllEvents() {
   try {
     const response = await fetch(BASE_URL);

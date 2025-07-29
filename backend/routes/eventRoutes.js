@@ -68,5 +68,5 @@ router.get("/", eventController.getAllEvents);
 router.post("/", upload.single("attachment"), eventController.createEvent);
 router.put("/:id", upload.single("attachment"), eventController.updateEvent);
 router.delete("/:id", eventController.deleteEvent);
-
+router.delete("/:id/attachment", eventController.deleteAttachment);
 module.exports = router;

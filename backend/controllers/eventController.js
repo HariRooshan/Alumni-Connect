@@ -200,3 +200,29 @@ exports.deleteEvent = async (req, res) => {
     res.status(500).json({ message: "Error deleting event", error });
   }
 };
+exports.deleteAttachment = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    if (!event.attachment) {
+      return res.status(400).json({ message: "No attachment to delete" });
+    }
+
+    // remove the file from disk
+    const diskPath = path.join(__dirname, "..", event.attachment);
+    if (fs.existsSync(diskPath)) {
+      fs.unlinkSync(diskPath);
+      console.log("🗑 Deleted attachment:", diskPath);
+    }
+
+    // clear the field in the document
+    event.attachment = null;
+    await event.save();
+
+    res.json({ message: "Attachment removed" });
+  } catch (err) {
+    console.error("Error deleting attachment:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

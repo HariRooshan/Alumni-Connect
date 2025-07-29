@@ -17,6 +17,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DesktopDatePicker } from "@mui/x-date-pickers";
 import * as eventService from "../services/eventService";
+import { deleteEventAttachment } from "../services/eventService";
 import { format, parse } from "date-fns";
 const EventForm = ({ eventForEdit, addOrEdit }) => {
   const initialFieldValues = {
@@ -32,7 +33,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
-
+  const [filePreviewUrl, setFilePreviewUrl] = useState(null);
   useEffect(() => {
     if (eventForEdit) {
       console.log("Received event for edit:", eventForEdit);
@@ -47,9 +48,19 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         location: eventForEdit.location || "",
         eventType: eventForEdit.eventType || "",
         passedOutYear: eventForEdit.passedOutYear || "",
+        file: eventForEdit.attachment || "",
       }));
+      setFile(null); // Reset file input
+      setFilePreviewUrl(null); // Reset preview
+    } else {
+      // Reset form to initial values when creating a new event
+      setValues(initialFieldValues);
+      setFile(null);
+      setFilePreviewUrl(null);
+      setErrors({});
     }
   }, [eventForEdit]);
+
 
 
   const handleInputChange = (e) => {
@@ -66,7 +77,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
     if (!selectedFile) return;
 
     const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/jpg"];
-    const maxSize = 5 * 1024 * 1024; 
+    const maxSize = 5 * 1024 * 1024;
 
     // Type validation
     if (!validTypes.includes(selectedFile.type)) {
@@ -75,6 +86,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         file: "Only PDF, JPEG, JPG, PNG, or WebP files are allowed.",
       }));
       setFile(null);
+      setFilePreviewUrl(null);
       return;
     }
 
@@ -84,11 +96,13 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         file: "File size must be less than 5MB.",
       }));
       setFile(null);
+      setFilePreviewUrl(null);
       return;
     }
 
     setErrors((prev) => ({ ...prev, file: "" }));
     setFile(selectedFile);
+    setFilePreviewUrl(URL.createObjectURL(selectedFile));
   };
 
   const handleSubmit = (e) => {
@@ -158,11 +172,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <TextField
-            label={
-              <span>
-                Event Name <span style={{ color: 'red' }}>*</span>
-              </span>
-            }
+            label={<span>Event Name <span style={{ color: 'red' }}>*</span></span>}
             variant="outlined"
             name="eventName"
             value={values.eventName}
@@ -176,13 +186,13 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker
               label="Event Date"
-              inputFormat="dd/MM/yyyy" // Display in DD/MM/YYYY format
-              value={values.eventDate ? parse(values.eventDate, "yyyy-MM-dd", new Date()) : null} // Parse stored date
+              inputFormat="dd/MM/yyyy"
+              value={values.eventDate ? parse(values.eventDate, "yyyy-MM-dd", new Date()) : null}
               onChange={(date) => {
                 if (date) {
                   setValues((prev) => ({
                     ...prev,
-                    eventDate: format(date, "yyyy-MM-dd"), // Store as YYYY-MM-DD
+                    eventDate: format(date, "yyyy-MM-dd"),
                   }));
                 }
               }}
@@ -197,14 +207,9 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
             />
           </LocalizationProvider>
         </Grid>
-
         <Grid item xs={12}>
           <TextField
-            label={
-              <span>
-                Description <span style={{ color: 'red' }}>*</span>
-              </span>
-            }
+            label={<span>Description <span style={{ color: 'red' }}>*</span></span>}
             variant="outlined"
             name="description"
             value={values.description}
@@ -218,11 +223,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         </Grid>
         <Grid item xs={12}>
           <TextField
-            label={
-              <span>
-                Location <span style={{ color: 'red' }}>*</span>
-              </span>
-            }
+            label={<span>Location <span style={{ color: 'red' }}>*</span></span>}
             variant="outlined"
             name="location"
             value={values.location}
@@ -234,9 +235,7 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
         </Grid>
         <Grid item xs={12}>
           <FormControl fullWidth variant="outlined" error={Boolean(errors.eventType)}>
-            <InputLabel> <span>
-              Event Type <span style={{ color: 'red' }}>*</span>
-            </span></InputLabel>
+            <InputLabel><span>Event Type <span style={{ color: 'red' }}>*</span></span></InputLabel>
             <Select
               label="Event Type"
               name="eventType"
@@ -293,27 +292,92 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
             />
           </Button>
 
-          {/* Show selected file with 'X' button */}
           {file && (
             <Chip
               label={file.name}
               color="primary"
               onDelete={() => {
                 setFile(null);
+                setFilePreviewUrl(null);
                 setErrors((prev) => ({ ...prev, file: "" }));
               }}
               sx={{ mt: 1 }}
             />
           )}
 
-          {/* Show error message below file input */}
           {errors.file && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>
               {errors.file}
             </Typography>
           )}
-        </Grid>
 
+          {/* File Preview */}
+
+          {file && filePreviewUrl ? (
+            // Preview for newly uploaded file
+            <Box mt={2}>
+              {file.type.startsWith("image/") ? (
+                <img
+                  src={filePreviewUrl}
+                  alt="Preview"
+                  style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8 }}
+                />
+              ) : file.type === "application/pdf" ? (
+                <iframe
+                  src={filePreviewUrl}
+                  title="PDF Preview"
+                  style={{ width: "100%", height: 300, border: "1px solid #ccc", borderRadius: 8 }}
+                />
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  Preview not supported for this file type.
+                </Typography>
+              )}
+            </Box>
+          ) : values.file ? (
+            // Preview for existing uploaded file
+            <Box mt={2} sx={{ position: "relative", display: "inline-block" }}>
+              {values.file.toLowerCase().endsWith(".pdf") ? (
+                <iframe
+                  src={`http://localhost:5000${values.file}`}
+                  title="PDF Preview"
+                  style={{ width: "100%", height: 300, border: "0px", borderRadius: 8, paddingLeft: "13%"
+                   }}
+                />
+              ) : (
+                <img
+                  src={`http://localhost:5000${values.file}`}
+                  alt="Existing"
+                  style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8 }}
+                />
+              )}
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                sx={{ mt: 1, ml: 1 }}
+                onClick={async () => {
+                  if (values._id) {
+                    try {
+                      await deleteEventAttachment(values._id);
+                    } catch (e) {
+                      console.error(e);
+                      // maybe show an error toast
+                    }
+                  }
+                  // clear form state
+                  setValues(v => ({ ...v, file: "" }));
+                  setFile(null);
+                  setFilePreviewUrl(null);
+                }}
+              >
+                Remove File
+              </Button>
+            </Box>
+          ) : null}
+
+
+        </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
