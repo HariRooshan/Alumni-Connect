@@ -336,44 +336,47 @@ const EventForm = ({ eventForEdit, addOrEdit }) => {
             </Box>
           ) : values.file ? (
             // Preview for existing uploaded file
-            <Box mt={2} sx={{ position: "relative", display: "inline-block" }}>
-              {values.file.toLowerCase().endsWith(".pdf") ? (
-                <iframe
-                  src={`http://localhost:5000${values.file}`}
-                  title="PDF Preview"
-                  style={{ width: "100%", height: 300, border: "0px", borderRadius: 8, paddingLeft: "13%"
-                   }}
-                />
-              ) : (
-                <img
-                  src={`http://localhost:5000${values.file}`}
-                  alt="Existing"
-                  style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8 }}
-                />
-              )}
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                sx={{ mt: 1, ml: 1 }}
-                onClick={async () => {
-                  if (values._id) {
-                    try {
-                      await deleteEventAttachment(values._id);
-                    } catch (e) {
-                      console.error(e);
-                      // maybe show an error toast
-                    }
-                  }
-                  // clear form state
-                  setValues(v => ({ ...v, file: "" }));
-                  setFile(null);
-                  setFilePreviewUrl(null);
+            <Box mt={2} sx={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            {values.file.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={`http://localhost:5000${values.file}`}
+                title="PDF Preview"
+                style={{
+                  width: "100%",
+                  height: 300,
+                  border: "0px",
+                  borderRadius: 8
                 }}
-              >
-                Remove File
-              </Button>
-            </Box>
+              />
+            ) : (
+              <img
+                src={`http://localhost:5000${values.file}`}
+                alt="Existing"
+                style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8 }}
+              />
+            )}
+
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ mt: 1 }}
+              onClick={async () => {
+                if (values._id) {
+                  try {
+                    await deleteEventAttachment(values._id);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+                setValues(v => ({ ...v, file: "" }));
+                setFile(null);
+                setFilePreviewUrl(null);
+              }}
+            >
+              Remove File
+            </Button>
+          </Box>
           ) : null}
 
 
