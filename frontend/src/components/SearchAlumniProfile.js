@@ -27,7 +27,7 @@ import WorkIcon from '@mui/icons-material/Work';
     const [data, setData] = useState([]); // Store all alumni data
     const [filteredData, setFilteredData] = useState([]); // Store search results
     const [filters, setFilters] = useState({}); // Store search filters
-   // const [selectedFilters, setSelectedFilters] = useState([]); // Active filters
+    const [selectedFilters, setSelectedFilters] = useState([]); // Active filters
     const [recentSearches, setRecentSearches] = useState([]); // Store search history
     const [suggestedProfile, setSuggestedProfile] = useState(null); // Suggested alumni profile
     const [searchCount, setSearchCount] = useState(0); // Track search count
@@ -42,7 +42,7 @@ import WorkIcon from '@mui/icons-material/Work';
       setSearchCount(0);
       const storedSearchCount = parseInt(localStorage.getItem("searchCount"), 10) || 0;
       setSearchCount(storedSearchCount); // Reset search count on mount
-    }, [loadRecentSearches]);
+    }, []);
     
     useEffect(() => {
       console.log("Updated Filters:", filters);
@@ -131,7 +131,7 @@ import WorkIcon from '@mui/icons-material/Work';
     
       let cleanedFilters = {};
 
-      // Preprocess filters once (Avoid redundant `.toLowerCase()`)
+      // Preprocess filters once (Avoid redundant .toLowerCase())
       Object.keys(filters).forEach((key) => {
         const val = filters[key] ?? "";
         if (typeof val === "string" && val.trim() !== "") {
@@ -144,7 +144,7 @@ import WorkIcon from '@mui/icons-material/Work';
         return;
       }
     
-      // **Optimized Filtering**
+      // *Optimized Filtering*
       let filtered = [];
       for (let alumni of data) {
         let match = true; // Assume match, stop checking if false
@@ -181,65 +181,61 @@ import WorkIcon from '@mui/icons-material/Work';
     
     // 🔹 Suggest profile based on search filters
     const suggestProfile = (searchedResults) => {
-      if (!searchedResults || searchedResults.length === 0) return;
-
-      const alumniFilter = filters.name?.toLowerCase();
-      const sectorFilter = filters.sector?.toLowerCase();
-      const gradYearFilter = filters.yearOfGraduation;
-      const higherStudiesFilter = filters.higherStudies?.toLowerCase();
-      const institutionFilter = filters.institutionName?.toLowerCase();
-      const companyFilter = filters.company?.toLowerCase();
-
+      if (!searchedResults || searchedResults.length === 0) {
+        console.warn("⚠ No search results found to suggest a profile.");
+        return;
+      }
+    
+      const alumniFilter = filters["Name of the alumni"];
+      const sectorFilter = filters["Sector"];
+      const gradYearFilter = filters["Year of Graduation"];
+      const higherStudiesFilter = filters["Higher Studies"];
+      const institutionFilter = filters["Institution Name"];
+    
+      // 🔹 Weight-based Scoring
       const rankedProfiles = searchedResults.slice().sort((a, b) => {
         let scoreA = 0, scoreB = 0;
-
-        // Name fuzzy/partial match
-        if (alumniFilter) {
-          if (a.name?.toLowerCase() === alumniFilter) scoreA += 4;
-          else if (a.name?.toLowerCase().includes(alumniFilter)) scoreA += 2;
-          if (b.name?.toLowerCase() === alumniFilter) scoreB += 4;
-          else if (b.name?.toLowerCase().includes(alumniFilter)) scoreB += 2;
-        }
-
-        // Sector
-        if (sectorFilter) {
-          if (a.sector?.toLowerCase() === sectorFilter) scoreA += 2;
-          if (b.sector?.toLowerCase() === sectorFilter) scoreB += 2;
-        }
-
-        // Graduation Year proximity
+    
+        // Exact name match gets highest priority
+        if (alumniFilter && a["Name of the alumni"] === alumniFilter) scoreA += 3;
+        if (alumniFilter && b["Name of the alumni"] === alumniFilter) scoreB += 3;
+    
+        // Sector relevance
+        if (sectorFilter && a["Sector"] === sectorFilter) scoreA += 2;
+        if (sectorFilter && b["Sector"] === sectorFilter) scoreB += 2;
+    
+        // Graduation Year proximity (recent graduates prioritized)
         if (gradYearFilter) {
-          const diffA = Math.abs(a.yearOfGraduation - gradYearFilter);
-          const diffB = Math.abs(b.yearOfGraduation - gradYearFilter);
-          scoreA += Math.max(0, 5 - diffA);
-          scoreB += Math.max(0, 5 - diffB);
+          const diffA = Math.abs(a["Year of Graduation"] - gradYearFilter);
+          const diffB = Math.abs(b["Year of Graduation"] - gradYearFilter);
+          scoreA += (5 - diffA); // The closer the year, the higher the score
+          scoreB += (5 - diffB);
         }
-
-        // Higher Studies
-        if (higherStudiesFilter) {
-          if (a.higherStudies?.toLowerCase() === higherStudiesFilter) scoreA += 1;
-          if (b.higherStudies?.toLowerCase() === higherStudiesFilter) scoreB += 1;
-        }
-
-        // Institution
-        if (institutionFilter) {
-          if (a.institutionName?.toLowerCase() === institutionFilter) scoreA += 1;
-          if (b.institutionName?.toLowerCase() === institutionFilter) scoreB += 1;
-        }
-
-        // Company
-        if (companyFilter) {
-          if (a.company?.toLowerCase() === companyFilter) scoreA += 2;
-          if (b.company?.toLowerCase() === companyFilter) scoreB += 2;
-        }
-
-        return scoreB - scoreA;
+    
+        // Higher Studies relevance
+        if (higherStudiesFilter && a["Higher Studies"] === higherStudiesFilter) scoreA += 1;
+        if (higherStudiesFilter && b["Higher Studies"] === higherStudiesFilter) scoreB += 1;
+    
+        // Institution match (if Higher Studies = "Yes")
+        if (institutionFilter && a["Institution Name"] === institutionFilter) scoreA += 1;
+        if (institutionFilter && b["Institution Name"] === institutionFilter) scoreB += 1;
+    
+        return scoreB - scoreA; // Sort descending
       });
-
+    
       const profile = rankedProfiles[0];
-      if (!profile) return;
+    
+      if (!profile) {
+        console.error("❌ No valid profile found to suggest.");
+        return;
+      }
+    
       setSuggestedProfile(profile);
+      console.log("✅ Suggested Profile:", profile);
+    
       localStorage.setItem("suggestedProfile", JSON.stringify(profile));
+    
+      // ✅ Call updateSearchCount only when a valid profile is found
       updateSearchCount(profile);
     };
     
@@ -310,7 +306,7 @@ if (token) {
   console.log("User Email:", EMAIL_ID);
   userRole = decodedToken.role;
 
-  if(userRole==="Student")
+  if(userRole=="Student")
   {
     if (!profile || !EMAIL_ID) {
       console.error("❌ Profile data or email ID is missing!");
@@ -649,18 +645,18 @@ return (
             background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
             color: '#fff',
             fontWeight: 'bold',
-            borderRadius: 4,
-            boxShadow: '0 4px 16px 0 rgba(30,144,255,0.10)',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
             letterSpacing: 1,
-            px: 2.5, // reduced
-            py: 1.2, // reduced
-            fontSize: 15, // reduced
-            minWidth: 140, // reduced
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
             transition: 'all 0.2s',
             textTransform: 'uppercase',
             '&:hover': {
               background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
-              boxShadow: '0 6px 24px 0 rgba(106,13,173,0.15)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
               transform: 'scale(1.05)',
             },
             flex: 1,
@@ -675,18 +671,18 @@ return (
             background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
             color: '#fff',
             fontWeight: 'bold',
-            borderRadius: 4,
-            boxShadow: '0 4px 16px 0 rgba(30,144,255,0.10)',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
             letterSpacing: 1,
-            px: 2.5, // reduced
-            py: 1.2, // reduced
-            fontSize: 15, // reduced
-            minWidth: 140, // reduced
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
             transition: 'all 0.2s',
             textTransform: 'uppercase',
             '&:hover': {
               background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
-              boxShadow: '0 6px 24px 0 rgba(106,13,173,0.15)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
               transform: 'scale(1.05)',
             },
             flex: 1,
@@ -704,25 +700,25 @@ return (
           background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
           color: '#fff',
           fontWeight: 'bold',
-          borderRadius: 4,
-          boxShadow: '0 4px 16px 0 rgba(30,144,255,0.10)',
+          borderRadius: 3,
+          boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
           letterSpacing: 1,
-          px: 2.5, // reduced
-          py: 1.2, // reduced
-          fontSize: 15, // reduced
-          minWidth: 140, // reduced
+          px: 2,
+          py: 1,
+          fontSize: 14,
+          minWidth: 110,
           mt: 2,
           transition: 'all 0.2s',
           textTransform: 'uppercase',
           '&:hover': {
             background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
-            boxShadow: '0 6px 24px 0 rgba(106,13,173,0.15)',
+            boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
             transform: 'scale(1.05)',
           },
         }}
         onClick={handleSearch}
       >
-        <SearchIcon sx={{ mr: 1, fontSize: 22 }} /> Search
+        <SearchIcon sx={{ mr: 1, fontSize: 18 }} /> Search
       </Button>
 </Box>
 
@@ -788,10 +784,10 @@ return (
                     <TableCell
                       key={idx}
                       sx={{
-                        whiteSpace: key === 'linkedinUrl' ? 'normal' : 'nowrap',
-                        overflow: key === 'linkedinUrl' ? 'visible' : 'hidden',
-                        textOverflow: key === 'linkedinUrl' ? 'unset' : 'ellipsis',
-                        // Removed maxWidth/minWidth/width for LinkedIn
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        ...(key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
                       }}
                     >
                       {alumni[key] || "N/A"}
@@ -836,7 +832,7 @@ return (
       </DialogActions>
     </Dialog>
 
-    {userRole !== "Student" && (
+    {userRole != "Student" && (
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
         <Button
           variant="contained"
@@ -845,23 +841,23 @@ return (
             background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
             color: '#fff',
             fontWeight: 'bold',
-            borderRadius: 4,
-            boxShadow: '0 4px 16px 0 rgba(30,144,255,0.10)',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
             letterSpacing: 1,
-            px: 2.5, // reduced
-            py: 1.2, // reduced
-            fontSize: 15, // reduced
-            minWidth: 140, // reduced
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
             transition: 'all 0.2s',
             textTransform: 'uppercase',
             '&:hover': {
               background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
-              boxShadow: '0 6px 24px 0 rgba(106,13,173,0.15)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
               transform: 'scale(1.05)',
             },
           }}
         >
-          <SearchIcon sx={{ mr: 1, fontSize: 22 }} /> Download as PDF
+          <SearchIcon sx={{ mr: 1, fontSize: 18 }} /> Download as PDF
         </Button>
       </Box>
     )}
