@@ -4,6 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, Grid, CircularProgress,
   TextField, MenuItem, Select, FormControl, InputLabel, Box
 } from "@mui/material";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import axios from "axios";
 
 const EventList = () => {
@@ -166,28 +167,70 @@ const EventList = () => {
             <DialogTitle sx={{ fontWeight: "bold", color: "primary.main", textAlign: "center" }}>
               {selectedEvent.title}
             </DialogTitle>
-            <DialogContent sx={{ textAlign: "center", pb: 3 }}>
-              {selectedEvent.attachment && (
-                <img
-                  src={`http://localhost:5000${selectedEvent.attachment}`}
-                  alt={selectedEvent.title}
-                  style={{ width: "100%", borderRadius: 8, marginBottom: 16 }}
-                  onClick={() => window.open(`http://localhost:5000${selectedEvent.attachment}`, "_blank")}
-                />
-              )}
+             <DialogContent sx={{ textAlign: "center", pb: 3 }}>
+              {selectedEvent.attachment && (() => {
+                const url = `http://localhost:5000${selectedEvent.attachment}`;
+                const isPDF = /\.pdf$/i.test(url);
+                if (isPDF) {
+                  return (
+                    <Box sx={{ mb: 2 }}>
+                      <PictureAsPdfIcon sx={{ fontSize: 60, color: "#d32f2f" }} />
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        PDF Attachment
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        sx={{ mt: 1 }}
+                        onClick={() => window.open(url, "_blank")}
+                      >
+                        View PDF
+                      </Button>
+                      {/* Optional inline preview */}
+                      <Box
+                        component="object"
+                        data={url}
+                        type="application/pdf"
+                        sx={{ width: "100%", height: 300, mt: 2, border: "1px solid #ccc" }}
+                      />
+                    </Box>
+                  );
+                } else {
+                  return (
+                    <Box
+                      component="img"
+                      src={url}
+                      alt={selectedEvent.title}
+                      sx={{
+                        width: "100%",
+                        borderRadius: 1,
+                        mb: 2,
+                        cursor: "pointer",
+                      }}
+                      onClick={() => window.open(url, "_blank")}
+                    />
+                  );
+                }
+              })()}
               <Typography variant="body1" sx={{ mb: 2 }}>
                 {selectedEvent.description}
               </Typography>
               <Typography variant="body2" fontWeight="bold">
-                📅 {new Date(selectedEvent.date).toLocaleDateString()} | 📍 {selectedEvent.location}
+                📅 {new Date(selectedEvent.date).toLocaleDateString()} | 📍{" "}
+                {selectedEvent.location}
               </Typography>
               <Typography variant="body2" sx={{ mt: 1 }}>
                 🎭 <strong>Type:</strong> {selectedEvent.eventType}
               </Typography>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="h6" color="primary">📞 Contact</Typography>
-                <Typography variant="body2"><strong>Phone:</strong> 9000000000</Typography>
-                <Typography variant="body2"><strong>Email:</strong> alumni.events@example.com</Typography>
+                <Typography variant="h6" color="primary">
+                  📞 Contact
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Phone:</strong> 9000000000
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Email:</strong> alumni.events@example.com
+                </Typography>
               </Box>
             </DialogContent>
           </>
