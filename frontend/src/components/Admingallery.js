@@ -4,6 +4,10 @@ import {
   Card,
   CardMedia,
   CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Typography,
   Tabs,
   Tab,
@@ -33,6 +37,9 @@ function AdminGallery() {
   const [loadingAlbums, setLoadingAlbums] = useState(true);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [sortOrder, setSortOrder] = useState("newest");
 
   useEffect(() => {
     fetchAllPhotos();
@@ -60,6 +67,11 @@ function AdminGallery() {
     }
     setLoadingAlbums(false);
   };
+  // sort the photos array by mtimeMs
+  const sortedPhotos = [...allPhotos].sort((a, b) =>
+    sortOrder === "newest" ? b.mtimeMs - a.mtimeMs : a.mtimeMs - b.mtimeMs
+  );
+
   const openAlbum = async (albumName) => {
     setTimeout(async () => {
       try {
@@ -122,33 +134,144 @@ function AdminGallery() {
         <Tab label="Albums" />
       </Tabs>
 
-      {tabIndex === 0 && (loadingPhotos ? <CircularProgress /> : (
-        <Grid container spacing={2} justifyContent="center">
-          {allPhotos.map((photo, index) => (
-            <Grid item key={index} xs={12} sm={4} sx={{ position: "relative" }}>
-              <Card sx={{ cursor: "pointer" }}>
-                <IconButton
-                  sx={{ position: "absolute", top: 5, right: 5, zIndex: 1 }}
-                  size="small"
-                  onClick={() => confirmDelete("photo", { filename: photo.filename })}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={photo.src}
-                  alt="Uploaded Photo"
-                  loading="lazy"
-                />
-                <CardContent>
-                  <Typography variant="body2">{photo.caption}</Typography>
-                </CardContent>
-              </Card>
+      {tabIndex === 0 && (
+        <>
+          {/* --- NEW SORT CONTROL --- */}
+          <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+            <FormControl
+              size="small"
+              sx={{
+                minWidth: 160,
+                background: "#fff",
+                borderRadius: 4,
+                boxShadow: 1,
+                "& .MuiInputBase-root": {
+                  borderRadius: 4,
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#bdbdbd",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#1976d2",
+                },
+              }}
+            >
+              <InputLabel>Sort by</InputLabel>
+              <Select
+                value={sortOrder}
+                label="Sort by"
+                onChange={e => setSortOrder(e.target.value)}
+                sx={{
+                  fontWeight: 500,
+                  color: "#333",
+                  "& .MuiSelect-icon": {
+                    color: "#1976d2",
+                  },
+                }}
+              >
+                <MenuItem value="newest">Newest First</MenuItem>
+                <MenuItem value="oldest">Oldest First</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
+          {loadingPhotos ? (
+            <CircularProgress />
+          ) : (
+            <Grid container spacing={2} justifyContent="center">
+              {sortedPhotos.map((photo, index) => (
+                <Grid item key={index} xs={12} sm={4} sx={{ position: "relative" }}>
+                  <Card
+                    sx={{
+                      cursor: "pointer",
+                      minHeight: 200,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      boxShadow: 3,
+                      borderRadius: 3,
+                      border: "1px solid #e0e0e0",
+                      position: "relative",
+                      transition: "box-shadow 0.2s",
+                      "&:hover": { boxShadow: 6 }
+                    }}
+                    onClick={() => {
+                      setSelectedPhoto(photo);
+                      setPhotoDialogOpen(true);
+                    }}
+                  >
+                    <Box sx={{ position: "relative" }}>
+                      <CardMedia
+                        component="img"
+                        height="180"
+                        image={photo.src}
+                        alt="Uploaded Photo"
+                        loading="lazy"
+                        sx={{
+                          objectFit: "cover",
+                          borderTopLeftRadius: 12,
+                          borderTopRightRadius: 12,
+                          minHeight: 180,
+                          background: "#f5f5f5"
+                        }}
+                      />
+                      <IconButton
+                        sx={{
+                          position: "absolute",
+                          top: 10,
+                          right: 10,
+                          zIndex: 2,
+                          background: "rgba(255,255,255,0.92)",
+                          boxShadow: 2,
+                          border: "2px solid #fff",
+                          transition: "background 0.2s, color 0.2s",
+                          "&:hover": {
+                            background: "#d32f2f",
+                            color: "#fff",
+                          },
+                        }}
+                        size="small"
+                        onClick={event => {
+                          event.stopPropagation?.();
+                          confirmDelete("photo", { filename: photo.filename, album: photo.album }, event);
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                    <CardContent
+                      sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        
+                        height: "3%",
+                        p: 1,
+                        background: "#fafafa",
+                        borderBottomLeftRadius: 12,
+                        borderBottomRightRadius: 12,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          textAlign: "center",
+                          width: "100%",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {photo.caption || <span style={{ color: "#bbb" }}>No caption</span>}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      ))}
+          )}
+        </>
+      )}
 
       {tabIndex === 1 && (loadingAlbums ? <CircularProgress /> : (
         <Grid container spacing={2} justifyContent="center">
@@ -156,9 +279,25 @@ function AdminGallery() {
             <Grid item key={album.albumName} xs={12} sm={4} sx={{ position: "relative" }}>
               <Card sx={{ cursor: "pointer" }} onClick={() => openAlbum(album.albumName)}>
                 <IconButton
-                  sx={{ position: "absolute", top: 5, right: 5, zIndex: 1 }}
-                  size="small"
-                  onClick={(event) => confirmDelete("album", album.albumName, event)}
+                  sx={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    zIndex: 2,
+                    background: "rgba(255,255,255,0.92)",
+                    boxShadow: 2,
+                    border: "2px solid #fff",
+                    transition: "background 0.2s, color 0.2s",
+                    "&:hover": {
+                      background: "#d32f2f",
+                      color: "#fff",
+                    },
+                  }}
+                  size="medium"
+                  onClick={(event) => {
+                    event.stopPropagation?.();
+                    confirmDelete("album", album.albumName, event);
+                  }}
                 >
                   <Delete fontSize="small" />
                 </IconButton>
@@ -181,7 +320,7 @@ function AdminGallery() {
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
-        sx={{ zIndex: 1300 }} // Ensure it appears above other elements
+        sx={{ zIndex: 1300 }}
       >
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -218,6 +357,50 @@ function AdminGallery() {
               <IconButton onClick={() => setSliderIndex((prev) => (prev + 1) % albumPhotos.length)}>
                 <ArrowForward />
               </IconButton>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={photoDialogOpen}
+        onClose={() => setPhotoDialogOpen(false)}
+        maxWidth="md"
+      >
+        <DialogContent sx={{ position: "relative", p: 2, textAlign: "center" }}>
+          <IconButton
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              zIndex: 10,
+              background: "rgba(255,255,255,0.92)",
+              boxShadow: 2,
+              border: "2px solid #fff",
+              transition: "background 0.2s, color 0.2s",
+              "&:hover": {
+                background: "#d32f2f",
+                color: "#fff",
+              },
+            }}
+            onClick={() => setPhotoDialogOpen(false)}
+            size="medium"
+          >
+            <Close />
+          </IconButton>
+          {selectedPhoto && (
+            <Box sx={{ mt: 4 }}>
+              <Box
+                component="img"
+                src={selectedPhoto.src}
+                alt={selectedPhoto.caption || "Photo"}
+                sx={{ maxWidth: "100%", maxHeight: "80vh", borderRadius: 2 }}
+              />
+              {selectedPhoto.caption && (
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                  {selectedPhoto.caption}
+                </Typography>
+              )}
             </Box>
           )}
         </DialogContent>

@@ -176,6 +176,7 @@ const UpdateProfile = () => {
                 <Grid item xs={12} sm={4}>
                   <TextField label="Company Location" name="companyLocation" value={formData.companyLocation} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                   <TextField label="Achievements" name="achievements" value={formData.achievements} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
+                  <TextField label="Job Title" name="job" value={formData.job} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                   <TextField select label="Higher Studies" name="higherStudies" value={formData.higherStudies} onChange={handleChange} fullWidth sx={{ mb: 2 }}>
                     <MenuItem value="">Select</MenuItem>
                     <MenuItem value="Yes">Yes</MenuItem>
