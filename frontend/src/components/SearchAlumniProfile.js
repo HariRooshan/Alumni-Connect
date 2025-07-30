@@ -1,10 +1,29 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // ✅ Import the autoTable plugin
-import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,TableHead,TableRow,TableBody,TableCell,Select,MenuItem} from "@mui/material";
+import { TextField, Button, Checkbox, Paper, Typography, Box, TableContainer, Table, TableHead, TableRow, TableBody, TableCell, Select, MenuItem, Divider, InputAdornment, Dialog, DialogTitle, DialogContent, DialogActions, FormGroup, FormControlLabel } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
+import SchoolIcon from '@mui/icons-material/School';
+import BusinessIcon from '@mui/icons-material/Business';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import WorkIcon from '@mui/icons-material/Work';
   const SearchAlumniProfile = () => {
+    // PDF column selection state
+    const allColumns = [
+      { key: "name", label: "Name" },
+      { key: "email", label: "Email" },
+      { key: "yearOfGraduation", label: "Graduation Year" },
+      { key: "programme", label: "Programme" },
+      { key: "sector", label: "Sector" },
+      { key: "higherStudies", label: "Higher Studies" },
+      { key: "institutionName", label: "Institution" },
+      { key: "job", label: "Job Title" },
+      { key: "linkedinUrl", label: "LinkedIn" },
+    ];
+    const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+    const [selectedPdfColumns, setSelectedPdfColumns] = useState(allColumns.map(col => col.key));
     const [data, setData] = useState([]); // Store all alumni data
     const [filteredData, setFilteredData] = useState([]); // Store search results
     const [filters, setFilters] = useState({}); // Store search filters
@@ -93,17 +112,16 @@ import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,Tabl
       }
     };
 
-
     const keyMapping = {
-        name: "name",
-        email: "email",
-        yearOfGraduation: "yearOfGraduation",
-        programme: "programme",
-        sector: "sector",
-        higherStudies: "higherStudies",
-        institutionName: "institutionName",
-      };
-
+      name: "name",
+      email: "email",
+      yearOfGraduation: "yearOfGraduation",
+      programme: "programme",
+      sector: "sector",
+      higherStudies: "higherStudies",
+      institutionName: "institutionName",
+      location: "location", // For future backend support
+    };
     // 🔹 Perform search based on selected filters
     const handleSearch = () => {
       if (!data || data.length === 0) {
@@ -112,11 +130,12 @@ import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,Tabl
       }
     
       let cleanedFilters = {};
-      
-      // Preprocess filters once (Avoid redundant `.toLowerCase()`)
+
+      // Preprocess filters once (Avoid redundant .toLowerCase())
       Object.keys(filters).forEach((key) => {
-        if (filters[key]?.trim() !== "") {
-          cleanedFilters[key] = filters[key].trim().toLowerCase();
+        const val = filters[key] ?? "";
+        if (typeof val === "string" && val.trim() !== "") {
+          cleanedFilters[key] = val.trim().toLowerCase();
         }
       });
     
@@ -125,9 +144,7 @@ import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,Tabl
         return;
       }
     
-      
-    
-      // **Optimized Filtering**
+      // *Optimized Filtering*
       let filtered = [];
       for (let alumni of data) {
         let match = true; // Assume match, stop checking if false
@@ -135,12 +152,15 @@ import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,Tabl
         for (let key in cleanedFilters) {
           let actualKey = keyMapping[key] || key;
           let alumniValue = alumni[actualKey] ? alumni[actualKey].toString().toLowerCase() : "";
-    
+
           if (actualKey === "higherStudies") {
             if (alumniValue !== cleanedFilters[key]) {
               match = false;
               break;
             }
+          } else if (actualKey === "location" || actualKey === "customLocation") {
+            // For now, skip filtering for location/customLocation
+            continue;
           } else {
             if (!alumniValue.startsWith(cleanedFilters[key])) {
               match = false;
@@ -162,7 +182,7 @@ import {TextField,Button,Checkbox,Paper,Typography,Box,TableContainer,Table,Tabl
     // 🔹 Suggest profile based on search filters
     const suggestProfile = (searchedResults) => {
       if (!searchedResults || searchedResults.length === 0) {
-        console.warn("⚠️ No search results found to suggest a profile.");
+        console.warn("⚠ No search results found to suggest a profile.");
         return;
       }
     
@@ -231,23 +251,36 @@ setSearchCount(savedCount);
 };
 
 // Define the key mapping
+// const keyMapping = {
+//   name: "Name of the alumni",
+//   email: "Email ID",
+//   yearOfGraduation: "yearOfGraduation",
+//   programme: "Name of the Programme",
+//   sector: "Sector"
+// };
 
 const handleSort = (order, field) => {
-  // Map field name to API key
-  console.log(filteredData);
-  const apiField = keyMapping[field] || field; // Get the corresponding API field
+  const apiField = keyMapping[field] || field; // Get corresponding API field
 
   console.log("🔍 Sorting By Field:", field);
   console.log("🔍 Using API Field:", apiField); // Debugging
 
-  const sortedData = [...filteredData].sort((a, b) =>
-    order === "asc" 
-      ? a[apiField] - b[apiField] // Ascending order
-      : b[apiField] - a[apiField] // Descending order
-  );
+  const sortedData = [...filteredData].sort((a, b) => {
+    const valueA = a[apiField];
+    const valueB = b[apiField];
+
+    if (typeof valueA === "number" && typeof valueB === "number") {
+      return order === "asc" ? valueA - valueB : valueB - valueA;
+    } else {
+      return order === "asc"
+        ? String(valueA).localeCompare(String(valueB)) // Sort strings alphabetically
+        : String(valueB).localeCompare(String(valueA)); // Reverse order
+    }
+  });
 
   setFilteredData(sortedData);
 };
+
 const token = localStorage.getItem("token");
  console.log("Token from localStorage:", token);
 
@@ -273,8 +306,7 @@ if (token) {
   console.log("User Email:", EMAIL_ID);
   userRole = decodedToken.role;
 
-  if(userRole=="Student")
-  {
+  if (userRole === "Student") {
     if (!profile || !EMAIL_ID) {
       console.error("❌ Profile data or email ID is missing!");
       return;
@@ -301,16 +333,30 @@ if (token) {
 
 console.log(filteredData); // Check if data is structured correctly
 
-const downloadPDF = () => {
-  // 🔹 Get token from localStorage (or wherever it's stored)
-  const token = localStorage.getItem("token");
 
+// Open dialog to select columns
+const openPdfDialog = () => {
+  setPdfDialogOpen(true);
+};
+
+const closePdfDialog = () => {
+  setPdfDialogOpen(false);
+};
+
+const handlePdfColumnChange = (key) => {
+  setSelectedPdfColumns((prev) =>
+    prev.includes(key)
+      ? prev.filter((col) => col !== key)
+      : [...prev, key]
+  );
+};
+
+const downloadPDF = () => {
+  const token = localStorage.getItem("token");
   if (!token) {
     alert("❌ You are not authorized to download the PDF.");
     return;
   }
-
-  // 🔹 Decode JWT to get user role
   let userRole;
   try {
     const decodedToken = jwtDecode(token);
@@ -320,78 +366,84 @@ const downloadPDF = () => {
     alert("❌ Invalid session. Please log in again.");
     return;
   }
-
-  // **✅ Proceed with PDF generation**
-  const doc = new jsPDF("landscape"); // Landscape mode for better spacing
-
+  if (userRole !== "Alumni") {
+    alert("❌ Only alumni can download the PDF.");
+    return;
+  }
+  // Only include selected columns
+  const selectedCols = allColumns.filter(col => selectedPdfColumns.includes(col.key));
+  if (selectedCols.length === 0) {
+    alert("Please select at least one column.");
+    return;
+  }
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
   doc.setFont("helvetica", "bold");
-  doc.text("Alumni Search Results", 14, 10);
+  doc.text("Alumni Search Results", doc.internal.pageSize.width / 2, 30, { align: 'center' });
   doc.setFont("helvetica", "normal");
-
-  const tableColumn = [
-    "Name",
-    "Email",
-    "Graduation Year",
-    "Programme",
-    "Sector",
-    "Higher Studies",
-    "Institution",
-    "Job Title",
-    "LinkedIn",
-  ];
-
-  // **🔹 Corrected Data Field Mapping**
-  const tableRows = filteredData.map((alumni) => [
-    alumni.name || "N/A",
-    alumni.email || "N/A",
-    alumni.yearOfGraduation || "N/A",
-    alumni.programme || "N/A",
-    alumni.sector || "N/A",
-    alumni.higherStudies || "N/A",
-    alumni.institutionName || "N/A",
-    alumni.job || "N/A",
-    alumni.linkedinUrl || "N/A",
-  ]);
-
+  const tableColumn = selectedCols.map(col => col.label);
+  const tableRows = filteredData.map((alumni) =>
+    selectedCols.map(col => {
+      if (col.key === 'linkedinUrl') {
+        const val = alumni[col.key] || "N/A";
+        if (val.length > 35) {
+          return val.slice(0, 32) + '...';
+        }
+        return val;
+      }
+      return alumni[col.key] || "N/A";
+    })
+  );
+  // Compact, clean, and centered style
   autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
-    startY: 20,
-    theme: "striped",
-    styles: { fontSize: 9 }, // Reduce font size for better fit
+    startY: 50,
+    theme: "grid",
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      halign: 'center',
+      valign: 'middle',
+      overflow: 'linebreak',
+      minCellHeight: 16,
+    },
     headStyles: {
-      fillColor: [0, 0, 0],
+      fillColor: [106, 13, 173],
       textColor: [255, 255, 255],
-      fontSize: 10,
+      fontSize: 9,
+      halign: 'center',
+      valign: 'middle',
+      fontStyle: 'bold',
     },
-    bodyStyles: { cellPadding: 3 },
-    columnStyles: {
-      0: { cellWidth: 35 }, // Name
-      1: { cellWidth: 50 }, // Email
-      2: { cellWidth: 25 }, // Graduation Year
-      3: { cellWidth: 40 }, // Programme
-      4: { cellWidth: 30 }, // Sector
-      5: { cellWidth: 25 }, // Higher Studies
-      6: { cellWidth: 45 }, // Institution
-      7: { cellWidth: 50 }, // Job Title
-      8: { cellWidth: 60 }, // LinkedIn
+    bodyStyles: {
+      cellPadding: 2,
+      halign: 'center',
+      valign: 'middle',
+      textColor: [30, 30, 30],
     },
+    alternateRowStyles: {
+      fillColor: [248, 246, 255],
+    },
+    margin: { top: 50, bottom: 30, left: 20, right: 20 },
+    tableWidth: 'auto',
     didDrawPage: (data) => {
+      doc.setFontSize(7);
       doc.text(
         `Page ${doc.internal.getNumberOfPages()}`,
-        doc.internal.pageSize.width - 20,
-        doc.internal.pageSize.height - 10
-      ); // Page numbering
+        doc.internal.pageSize.width - 40,
+        doc.internal.pageSize.height - 20
+      );
     },
-    margin: { top: 30, bottom: 30 },
-    tableWidth: "auto",
+    // Fit columns to page width
+    autoSize: true,
+    wordWrap: 'break-word',
   });
-
   doc.save("Alumni_Search_Results.pdf");
+  closePdfDialog();
 };
 
 return (
-  <Box sx={{ textAlign: "center", p: 0 }}>
+  <Box sx={{ textAlign: "center", p: 0, bgcolor: "#f6f6fa", minHeight: "100vh" }}>
     {/* Title Bar */}
     <Box
       sx={{
@@ -399,141 +451,274 @@ return (
         color: "white",
         p: 3,
         boxShadow: 3,
+        borderRadius: 2,
+        mb: 2,
       }}
     >
-      <Typography variant="h4" sx={{ textTransform: "uppercase" }}>
-        Alumni Search
+      <Typography variant="h4" sx={{ textTransform: "uppercase", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+        <SearchIcon sx={{ fontSize: 38, mr: 1 }} /> Alumni Search
       </Typography>
     </Box>
 
     <Box
-  sx={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 2,
-    width: "95%",
-    maxWidth: 1000,
-    m: "30px auto",
-    p: 1,
-    bgcolor: "white",
-    borderRadius: 2,
-    boxShadow: 3,
-    border: "3px solid #6a0dad",
-  }}
->
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        width: "97%",
+        maxWidth: 1100,
+        m: "30px auto",
+        p: 3,
+        bgcolor: "#f8f6ff",
+        borderRadius: 5,
+        boxShadow: '0 8px 32px 0 rgba(106,13,173,0.15)',
+        border: "2px solid #6a0dad",
+        background: 'linear-gradient(135deg, #f8f6ff 60%, #e3e6fa 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
   {/* Heading */}
-  <Typography variant="h6" sx={{ color: "#6a0dad", fontWeight: "bold", mb: 1 }}>
-    Search Filters
-  </Typography>
+      <Typography variant="h6" sx={{ color: "#6a0dad", fontWeight: "bold", mb: 1, letterSpacing: 1 }}>
+        Search Filters
+      </Typography>
+      <Divider sx={{ width: '90%', mb: 2, bgcolor: '#6a0dad' }} />
 
   {/* First Row - Name, Graduation Year, Sector */}
-  <Box sx={{ display: "flex", gap: 3, width: "80%", justifyContent: "center" }}>
-    <TextField
-      type="text"
-      name="name"
-      label="Name"
-      placeholder="Enter Name"
-      value={filters.name || ""}
-      onChange={handleFilterChange}
-      sx={{ flex: 1 }}
-    />
-    <TextField
-      type="number"
-      name="yearOfGraduation"
-      label="Graduation Year"
-      placeholder="Enter Graduation Year"
-      value={filters.yearOfGraduation || ""}
-      onChange={handleFilterChange}
-      sx={{ flex: 1 }}
-    />
-    <TextField
-      type="text"
-      name="sector"
-      label="Sector"
-      placeholder="Enter Sector"
-      value={filters.sector || ""}
-      onChange={handleFilterChange}
-      sx={{ flex: 1 }}
-    />
-  </Box>
+      <Box sx={{ display: "flex", gap: 3, width: "80%", justifyContent: "center", mb: 1 }}>
+        <TextField
+          type="text"
+          name="name"
+          label="Name"
+          placeholder="Enter Name"
+          value={filters.name || ""}
+          onChange={handleFilterChange}
+          sx={{ flex: 1 }}
+          InputProps={{ startAdornment: <InputAdornment position="start"><SchoolIcon sx={{ color: '#6a0dad' }} /></InputAdornment> }}
+        />
+        <TextField
+          type="number"
+          name="yearOfGraduation"
+          label="Graduation Year"
+          placeholder="e.g. 2005"
+          value={filters.yearOfGraduation || ""}
+          onChange={handleFilterChange}
+          sx={{ flex: 1 }}
+          InputProps={{ startAdornment: <InputAdornment position="start"><SchoolIcon sx={{ color: '#1e90ff' }} /></InputAdornment> }}
+        />
+        <Select
+          name="sector"
+          value={filters.sector || ""}
+          onChange={handleFilterChange}
+          displayEmpty
+          sx={{ flex: 1 }}
+          startAdornment={<BusinessIcon sx={{ color: '#6a0dad', mr: 1 }} />}
+        >
+          <MenuItem value="">Select Sector</MenuItem>
+          <MenuItem value="Public">Public</MenuItem>
+          <MenuItem value="Private">Private</MenuItem>
+        </Select>
+        <Select
+          name="location"
+          value={filters.location || ""}
+          onChange={handleFilterChange}
+          displayEmpty
+          sx={{ flex: 1 }}
+          startAdornment={<LocationOnIcon sx={{ color: '#1e90ff', mr: 1 }} />}
+        >
+          <MenuItem value="">Select Location</MenuItem>
+          <MenuItem value="Coimbatore">Coimbatore</MenuItem>
+          <MenuItem value="Chennai">Chennai</MenuItem>
+          <MenuItem value="Bengaluru">Bengaluru</MenuItem>
+          <MenuItem value="Hyderabad">Hyderabad</MenuItem>
+          <MenuItem value="Mumbai">Mumbai</MenuItem>
+          <MenuItem value="Pune">Pune</MenuItem>
+          <MenuItem value="Nagpur">Nagpur</MenuItem>
+          <MenuItem value="Delhi">Delhi</MenuItem>
+          <MenuItem value="Kolkata">Kolkata</MenuItem>
+          <MenuItem value="Ahmedabad">Ahmedabad</MenuItem>
+          <MenuItem value="Other">Other</MenuItem>
+        </Select>
+        {filters.location === "Other" && (
+          <TextField
+            type="text"
+            name="customLocation"
+            label="Enter City"
+            placeholder="Enter City Name"
+            value={filters.customLocation || ""}
+            onChange={handleFilterChange}
+            sx={{ flex: 1 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ color: '#1e90ff' }} /></InputAdornment> }}
+          />
+        )}
+      </Box>
+      <Divider sx={{ width: '90%', mb: 2, bgcolor: '#1e90ff' }} />
 
   {/* Second Row - Higher Studies, Institution Name (Conditional), Company */}
-  <Box sx={{ display: "flex", gap: 3, width: "80%", justifyContent: "center" }}>
-    <Select
-      name="higherStudies"
-      value={higherStudies}
-      onChange={(e) => {
-        setHigherStudies(e.target.value);
-        setFilters((prev) => ({
-          ...prev,
-          higherStudies: e.target.value,
-          institutionName: e.target.value === "Yes" ? prev.institutionName : "",
-        }));
-      }}  
-    
-      displayEmpty
-      sx={{ flex: 1 }}
-    >
-      <MenuItem value="">Higher Studies</MenuItem>
-      <MenuItem value="Yes">Yes</MenuItem>
-      <MenuItem value="No">No</MenuItem>
-    </Select>
+      <Box sx={{ display: "flex", gap: 3, width: "80%", justifyContent: "center", mb: 1 }}>
+        <Select
+          name="higherStudies"
+          value={higherStudies}
+          onChange={(e) => {
+            setHigherStudies(e.target.value);
+            setFilters((prev) => ({
+              ...prev,
+              higherStudies: e.target.value,
+              institutionName: e.target.value === "Yes" ? prev.institutionName : "",
+            }));
+          }}
+          displayEmpty
+          sx={{ flex: 1 }}
+          startAdornment={<SchoolIcon sx={{ color: '#6a0dad', mr: 1 }} />}
+        >
+          <MenuItem value="">Higher Studies</MenuItem>
+          <MenuItem value="Yes">Yes</MenuItem>
+          <MenuItem value="No">No</MenuItem>
+        </Select>
 
-    {higherStudies === "Yes" && (
-      <TextField
-        type="text"
-        name="institutionName"
-        label="Institution Name"
-        placeholder="Enter Institution Name"
-        value={filters.institutionName || ""}
-        onChange={handleFilterChange}
-        sx={{ flex: 1 }}
-      />
-    )}
+        {higherStudies === "Yes" && (
+          <TextField
+            type="text"
+            name="institutionName"
+            label="Institution Name"
+            placeholder="Enter Institution Name"
+            value={filters.institutionName || ""}
+            onChange={handleFilterChange}
+            sx={{ flex: 1 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SchoolIcon sx={{ color: '#1e90ff' }} /></InputAdornment> }}
+          />
+        )}
 
-    <TextField
-      type="text"
-      name="company"
-      label="Company"
-      placeholder="Enter Company"
-      value={filters.company || ""}
-      onChange={handleFilterChange}
-      sx={{ flex: 1 }}
-    />
-  </Box>
+        <Select
+          name="company"
+          value={filters.company || ""}
+          onChange={handleFilterChange}
+          displayEmpty
+          sx={{ flex: 1 }}
+          startAdornment={<WorkIcon sx={{ color: '#6a0dad', mr: 1 }} />}
+        >
+          <MenuItem value="">Select Company</MenuItem>
+          <MenuItem value="TCS">TCS</MenuItem>
+          <MenuItem value="Infosys">Infosys</MenuItem>
+          <MenuItem value="Wipro">Wipro</MenuItem>
+          <MenuItem value="HCL">HCL</MenuItem>
+          <MenuItem value="Tech Mahindra">Tech Mahindra</MenuItem>
+          <MenuItem value="Cognizant">Cognizant</MenuItem>
+          <MenuItem value="Accenture">Accenture</MenuItem>
+          <MenuItem value="Capgemini">Capgemini</MenuItem>
+          <MenuItem value="IBM">IBM</MenuItem>
+          <MenuItem value="L&T Infotech">L&T Infotech</MenuItem>
+          <MenuItem value="Mindtree">Mindtree</MenuItem>
+          <MenuItem value="Oracle">Oracle</MenuItem>
+          <MenuItem value="Amazon">Amazon</MenuItem>
+          <MenuItem value="Microsoft">Microsoft</MenuItem>
+          <MenuItem value="Google">Google</MenuItem>
+          <MenuItem value="SAP">SAP</MenuItem>
+          <MenuItem value="Deloitte">Deloitte</MenuItem>
+          <MenuItem value="EY">EY</MenuItem>
+          <MenuItem value="PwC">PwC</MenuItem>
+          <MenuItem value="ZS Associates">ZS Associates</MenuItem>
+          <MenuItem value="Other">Other</MenuItem>
+        </Select>
+        {filters.company === "Other" && (
+          <TextField
+            type="text"
+            name="customCompany"
+            label="Enter Company"
+            placeholder="Enter Company Name"
+            value={filters.customCompany || ""}
+            onChange={handleFilterChange}
+            sx={{ flex: 1 }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><WorkIcon sx={{ color: '#1e90ff' }} /></InputAdornment> }}
+          />
+        )}
+      </Box>
+      <Divider sx={{ width: '90%', mb: 2, bgcolor: '#6a0dad' }} />
 
   {/* Sorting Buttons */}
-  <Box sx={{ display: "flex", gap: 3, width: "50%", justifyContent: "center", mt: 2 }}>
-    <Button
-      variant="contained"
-      sx={{ bgcolor: "#6a0dad", "&:hover": { bgcolor: "#4500b5" }, flex: 1 }}
-      onClick={() => handleSort("asc","yearOfGraduation")}
-    >
-      Sort Ascending
-    </Button>
-    <Button
-      variant="contained"
-      sx={{ bgcolor: "#6a0dad", "&:hover": { bgcolor: "#4500b5" }, flex: 1 }}
-      onClick={() => handleSort("desc","yearOfGraduation")}
-    >
-      Sort Descending
-    </Button>
-  </Box>
+      <Box sx={{ display: "flex", gap: 3, width: "55%", justifyContent: "center", mt: 2 }}>
+        <Button
+          variant="contained"
+          sx={{
+            background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+            letterSpacing: 1,
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
+            transition: 'all 0.2s',
+            textTransform: 'uppercase',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+              transform: 'scale(1.05)',
+            },
+            flex: 1,
+          }}
+          onClick={() => handleSort("asc","yearOfGraduation")}
+        >
+          Sort Ascending
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+            letterSpacing: 1,
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
+            transition: 'all 0.2s',
+            textTransform: 'uppercase',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+              transform: 'scale(1.05)',
+            },
+            flex: 1,
+          }}
+          onClick={() => handleSort("desc","yearOfGraduation")}
+        >
+          Sort Descending
+        </Button>
+      </Box>
 
-  {/* Search Button */}
-  <Button
-    variant="contained"
-    sx={{
-      bgcolor: "#6a0dad",
-      "&:hover": { bgcolor: "#4d088a" },
-      width: "30%",
-      mt: 2,
-    }}
-    onClick={handleSearch}
-  >
-    Search
-  </Button>
+      {/* Search Button */}
+      <Button
+        variant="contained"
+        sx={{
+          background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+          color: '#fff',
+          fontWeight: 'bold',
+          borderRadius: 3,
+          boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+          letterSpacing: 1,
+          px: 2,
+          py: 1,
+          fontSize: 14,
+          minWidth: 110,
+          mt: 2,
+          transition: 'all 0.2s',
+          textTransform: 'uppercase',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+            boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+            transform: 'scale(1.05)',
+          },
+        }}
+        onClick={handleSearch}
+      >
+        <SearchIcon sx={{ mr: 1, fontSize: 18 }} /> Search
+      </Button>
 </Box>
 
     {/* Results Table */}
@@ -552,45 +737,64 @@ return (
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            {filteredData.length > 0 &&
-              Object.keys(filteredData[0])
-                .filter((key) => key !== "_id")
-                .map((key) => (
-                  <TableCell
-                    key={key}
-                    sx={{
-                      bgcolor: "#6a0dad",
-                      color: "white",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                    }}
-                  >
-                    {{
-                      rollNumber: "Roll No.",
-                      email: "Email",
-                      name: "Name",
-                      yearOfGraduation: "Graduation Year",
-                      linkedinUrl: "LinkedIn",
-                      job: "Job",
-                      sector: "Sector",
-                      higherStudies: "Higher Studies",
-                      institutionName: "Higher Studies Institution",
-                    }[key] || key}
-                  </TableCell>
-                ))}
+            {filteredData.length > 0 && (() => {
+              const keys = Object.keys(filteredData[0]).filter((key) => key !== "_id");
+              const keysWithoutLinkedIn = keys.filter(k => k !== 'linkedinUrl');
+              if (keys.includes('linkedinUrl')) keysWithoutLinkedIn.push('linkedinUrl');
+              return keysWithoutLinkedIn.map((key) => (
+                <TableCell
+                  key={key}
+                  sx={{
+                    bgcolor: "#6a0dad",
+                    color: "white",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    ...(key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
+                  }}
+                >
+                  {{
+                    rollNumber: "Roll No.",
+                    email: "Email",
+                    name: "Name",
+                    yearOfGraduation: "Graduation Year",
+                    linkedinUrl: "LinkedIn",
+                    job: "Job",
+                    sector: "Sector",
+                    higherStudies: "Higher Studies",
+                    institutionName: "Higher Studies Institution",
+                  }[key] || key}
+                </TableCell>
+              ));
+            })()}
           </TableRow>
         </TableHead>
         <TableBody>
           {filteredData.length > 0 ? (
-            filteredData.map((alumni, index) => (
-              <TableRow key={index}>
-                {Object.entries(alumni)
-                  .filter(([key]) => key !== "_id")
-                  .map(([key, value], idx) => (
-                    <TableCell key={idx}>{value || "N/A"}</TableCell>
+            filteredData.map((alumni, index) => {
+              const keys = Object.keys(alumni).filter((key) => key !== "_id");
+              const keysWithoutLinkedIn = keys.filter(k => k !== 'linkedinUrl');
+              if (keys.includes('linkedinUrl')) keysWithoutLinkedIn.push('linkedinUrl');
+              return (
+                <TableRow key={index}>
+                  {keysWithoutLinkedIn.map((key, idx) => (
+                    <TableCell
+                      key={idx}
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        ...(key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
+                      }}
+                    >
+                      {alumni[key] || "N/A"}
+                    </TableCell>
                   ))}
-              </TableRow>
-            ))
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell colSpan="100%" sx={{ textAlign: "center" }}>
@@ -601,16 +805,63 @@ return (
         </TableBody>
       </Table>
     </TableContainer>
-    {userRole != "Student" && (
-  <Button 
-    // sx={{pt:5,pb:5}}
-    variant="contained" color="primary" onClick={downloadPDF}>
-    Download as PDF
-  </Button>
-)}
+
+    {/* PDF Column Selection Dialog */}
+    <Dialog open={pdfDialogOpen} onClose={closePdfDialog}>
+      <DialogTitle>Select Columns for PDF</DialogTitle>
+      <DialogContent>
+        <FormGroup>
+          {allColumns.map((col) => (
+            <FormControlLabel
+              key={col.key}
+              control={
+                <Checkbox
+                  checked={selectedPdfColumns.includes(col.key)}
+                  onChange={() => handlePdfColumnChange(col.key)}
+                />
+              }
+              label={col.label}
+            />
+          ))}
+        </FormGroup>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closePdfDialog} color="secondary">Cancel</Button>
+        <Button onClick={downloadPDF} color="primary" variant="contained">Download PDF</Button>
+      </DialogActions>
+    </Dialog>
+
+    {userRole !== "Student" && (
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
+        <Button
+          variant="contained"
+          onClick={openPdfDialog}
+          sx={{
+            background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+            letterSpacing: 1,
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
+            transition: 'all 0.2s',
+            textTransform: 'uppercase',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+              transform: 'scale(1.05)',
+            },
+          }}
+        >
+          <SearchIcon sx={{ mr: 1, fontSize: 18 }} /> Download as PDF
+        </Button>
+      </Box>
+    )}
 
 </Box>
 );
 }
-
 export default SearchAlumniProfile;

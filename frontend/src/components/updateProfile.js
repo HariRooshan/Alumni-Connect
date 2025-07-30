@@ -160,7 +160,7 @@ const UpdateProfile = () => {
                 <Grid item xs={12} sm={4}>
                   <TextField label="Email" name="email" value={formData.email} fullWidth disabled sx={{ mb: 2 }} />
                   <TextField label="Name" name="name" value={formData.name} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
-                  <TextField label="Roll Number" name="rollNumber" value={formData.rollNumber} fullWidth disabled sx={{ mb: 2 }} />
+                  <TextField label="Roll Number" name="rollNumber" value={formData.rollNumber} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                   <TextField label="Year of Graduation" name="yearOfGraduation" value={formData.yearOfGraduation} onChange={handleChange} fullWidth sx={{ mb: 2 }} />
                 </Grid>
 

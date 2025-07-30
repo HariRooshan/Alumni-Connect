@@ -1,5 +1,5 @@
 // src/components/Slideshow.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Paper } from "@mui/material";
 
 const Slideshow = () => {

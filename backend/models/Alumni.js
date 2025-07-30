@@ -4,15 +4,14 @@ const alumniSchema = new mongoose.Schema(
   {
     rollNumber: {
       type: String,
-      unique: true,
-      required: true, // Primary Key
+      default: null,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      ref: "User", // Foreign Key referencing User collection
+      ref: "User_main", // Foreign Key referencing User collection
     },
     name: { type: String, required: true },
     yearOfGraduation: { type: Number, required: true },
