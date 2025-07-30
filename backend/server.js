@@ -56,7 +56,7 @@ const io = new Server(server, {
 
 // 🔹 SOCKET.IO INTEGRATION
 io.on("connection", (socket) => {
-  console.log(`🔵 User Connected: ${socket.id}`);
+  //console.log(`🔵 User Connected: ${socket.id}`);
 
   // Listen for new messages
   socket.on("sendMessage", (data) => {
@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-      console.log(`🔴 User Disconnected: ${socket.id}`);
+     // console.log(`🔴 User Disconnected: ${socket.id}`);
   });
 });
 

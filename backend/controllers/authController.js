@@ -263,3 +263,51 @@ exports.checkUserExists = async (req, res) => {
   }
 };
 
+
+
+exports.checkUserExists2 = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log(email);
+
+    // // Verify token using Google API
+    // const ticket = await client.verifyIdToken({
+    //   idToken: token,
+    //   audience: process.env.GOOGLE_CLIENT_ID, // Must match frontend OAuth Client ID
+    // });
+
+    // const payload = ticket.getPayload();
+    // if (!payload) {
+    //   return res.status(401).json({ message: "Invalid Google token" });
+    // }
+
+    // const { email, name, picture, sub } = payload;
+    // const userDomain = email.split("@")[1];
+    // const allowedDomains = ["gmail.com", "psgtech.ac.in"];
+
+    // if (!allowedDomains.includes(userDomain)) {
+    //   return res.status(403).json({ message: "Access denied. Use an allowed email domain." });
+    // }
+
+    // Check if user exists in database
+    const user = await User.findOne({ email });
+
+    if (user) {
+      return res.json({
+        message: "User found",
+        userExists: true,
+        user,
+      });
+    } else {
+      return res.status(404).json({
+         message: "User not found",
+         userExists: false,
+        // user: { email, name, picture, role: "user", id: sub },
+      });
+    }
+  } catch (error) {
+    console.error("Error verifying Google token:", error);
+    res.status(500).json({ message: "Google authentication failed" });
+  }
+};
+

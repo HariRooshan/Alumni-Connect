@@ -11,7 +11,7 @@ import SettingsTab from "./Tabs/SettingsTab";
 import ConnectionsTab from "./Tabs/ConnectionsTab";
 import MentorTab from "./Tabs/MentorTab";
 import MenteeTab from "./Tabs/MenteeTab";
-import Navbar from "./Navbar";
+import Navbar from "../NavBar";
 
 const Main = () => {
   const navigate = useNavigate();
