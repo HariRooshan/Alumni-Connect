@@ -224,7 +224,7 @@ exports.searchAlumni = async (req, res) => {
     } else if (company) {
       query.currentCompany = new RegExp(company.trim(), "i");
     }
-
+//
     const alumni = await Alumni.find(
       query,
       "rollNumber name email programStudied yearOfGraduation sector higherStudies institutionName companyLocation currentCompany linkedinUrl job"

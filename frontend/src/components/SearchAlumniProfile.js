@@ -315,7 +315,7 @@ import WorkIcon from '@mui/icons-material/Work';
   localStorage.setItem("suggestedProfile", JSON.stringify(profile));
   updateSearchCount(profile);
 };
-
+ 
     
 const loadSuggestedProfile = () => {
 const savedProfile = JSON.parse(localStorage.getItem("suggestedProfile"));
