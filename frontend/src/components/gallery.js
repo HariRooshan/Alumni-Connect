@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { 
   Box, Button, Card, CardMedia, CardContent, Typography, Dialog, DialogContent, 
   TextField, Tabs, Tab, Grid, CircularProgress, IconButton 

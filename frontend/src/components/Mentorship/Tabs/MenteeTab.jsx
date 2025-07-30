@@ -38,7 +38,7 @@ const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
   };
 
   return (
-    <Grid container spacing={3} sx={{pb:10}}>
+    <Grid container spacing={3} sx={{mb:5}}>
       {mentees.length === 0 ? (
         <Typography>No mentees available.</Typography>
         ) : (
