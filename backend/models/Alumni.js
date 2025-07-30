@@ -4,8 +4,6 @@ const alumniSchema = new mongoose.Schema(
   {
     rollNumber: {
       type: String,
-      unique: false,
-      required: false, // Primary Key
       default: null,
     },
     email: {

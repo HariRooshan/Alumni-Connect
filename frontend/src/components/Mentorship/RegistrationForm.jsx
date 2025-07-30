@@ -109,6 +109,7 @@ const RegistrationForm = () => {
             setSnackbarMessage("An error occurred while registering. Please try again.");
             setSnackbarOpen(true);
           });
+          await new Promise(res => setTimeout(res, 1000));
         const response = await fetch("http://localhost:5000/api/auth/check-user2", {
         method: "POST",
         headers: {
@@ -117,7 +118,8 @@ const RegistrationForm = () => {
         body: JSON.stringify({ email: EMAIL_ID }),
       });
       console.log(response);
-      if (response.status < 400) {
+
+      if (response.status !== 404) {
 
         const data = await response.json();
 
