@@ -16,6 +16,8 @@ const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 // const eventRoutes= require("./routes/eventRoutes");
 
+const path = require("path");
+const uploadPath = path.join(__dirname, "uploads");
 
 
 const app = express();
@@ -23,7 +25,7 @@ app.use(express.json());
 app.use(cors());
 // Set correct uploads path
 
-const uploadPath = "D:/Hari/Projects/Alumni-website/Ip_project - Copy (1)/Ip_project - Copy/backend/uploads"; 
+
 app.use('/uploads', express.static(uploadPath)); // This ensures images load correctly
 
 // Ensure uploads directory exists
@@ -54,7 +56,7 @@ const io = new Server(server, {
 
 // 🔹 SOCKET.IO INTEGRATION
 io.on("connection", (socket) => {
-  console.log(`🔵 User Connected: ${socket.id}`);
+  //console.log(`🔵 User Connected: ${socket.id}`);
 
   // Listen for new messages
   socket.on("sendMessage", (data) => {
@@ -66,7 +68,7 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-      console.log(`🔴 User Disconnected: ${socket.id}`);
+     // console.log(`🔴 User Disconnected: ${socket.id}`);
   });
 });
 

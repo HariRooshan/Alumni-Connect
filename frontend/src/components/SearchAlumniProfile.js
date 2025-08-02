@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import jsPDF from "jspdf";
@@ -383,8 +383,7 @@ if (token) {
   console.log("User Email:", EMAIL_ID);
   userRole = decodedToken.role;
 
-  if(userRole=="Student")
-  {
+  if (userRole === "Student") {
     if (!profile || !EMAIL_ID) {
       console.error("❌ Profile data or email ID is missing!");
       return;
@@ -889,7 +888,7 @@ return (
       </DialogActions>
     </Dialog>
 
-    {userRole != "Student" && (
+    {userRole !== "Student" && (
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
         <Button
           variant="contained"

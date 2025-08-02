@@ -19,7 +19,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Navbar from "./Navbar";
+import Navbar from "../NavBar";
 
 function MentorshipDashboard() {
   const navigate = useNavigate();
@@ -32,14 +32,14 @@ function MentorshipDashboard() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   // ✅ Retrieve user data from session storage
-  useEffect(() => {
-    const storedUser = sessionStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      navigate("/mentorship/login"); // Redirect to login if no session exists
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const storedUser = sessionStorage.getItem("user");
+  //   if (storedUser) {
+  //     setUser(JSON.parse(storedUser));
+  //   } else {
+  //     navigate("/mentorship/login"); // Redirect to login if no session exists
+  //   }
+  // }, [navigate]);
 
   useEffect(() => {
     fetchMemberCount ()

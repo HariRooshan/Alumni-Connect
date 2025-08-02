@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import Step1 from "./step1";
 import Step2 from "./step2";
 import Step3 from "./step3";
@@ -18,13 +19,19 @@ import {
 import { useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Navbar from "./Navbar";
+import Navbar from "../NavBar";
 
 const RegistrationForm = () => {
-
+  const token = localStorage.getItem("token");
+    if(!token){
+      navigate("/login");
+    }
+    const decodedToken = jwtDecode(token);
+     // Decode safely
+    let EMAIL_ID = decodedToken.email; // Extract email
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    email:sessionStorage.getItem("email"),
+    email:EMAIL_ID,
     role: "",
     firstName: "",
     lastName: "",
@@ -37,7 +44,7 @@ const RegistrationForm = () => {
     education: "",
     photo:sessionStorage.getItem("picture"),
   });
-
+  console.log(sessionStorage);
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
@@ -48,14 +55,14 @@ const RegistrationForm = () => {
   // Fetch user data from session storage
   const user = JSON.parse(sessionStorage.getItem("user"));
 
-  const nextStep = (data) => {
+  const nextStep = async(data) => {
     // Merge new data into formData
     // console.log(data.role['role']);
     if(step===1)
     {
       formData.role = data.role['role'];
     }
-    formData.email = sessionStorage.getItem("email");
+    formData.email = EMAIL_ID;
     const updatedFormData = { ...formData};
     // console.log(formData);
 
@@ -102,6 +109,41 @@ const RegistrationForm = () => {
             setSnackbarMessage("An error occurred while registering. Please try again.");
             setSnackbarOpen(true);
           });
+          await new Promise(res => setTimeout(res, 1000));
+        const response = await fetch("http://localhost:5000/api/auth/check-user2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: EMAIL_ID }),
+      });
+      console.log(response);
+
+      if (response.status !== 404) {
+
+        const data = await response.json();
+
+        const user = data.user;
+        const fullName = user.firstName + " " + user.lastName;
+        const isAdminOrMentor = user.role !== "user";
+
+        const userSession = {
+          name: isAdminOrMentor ? fullName : user.name,
+          email: user.email,
+          picture: isAdminOrMentor ? user.photo : user.picture,
+          role: user.role || "user",
+          id: user._id,
+        };
+
+        // ✅ Store session
+        sessionStorage.setItem("user", JSON.stringify(userSession));
+        sessionStorage.setItem("email", user.email);
+        sessionStorage.setItem("name", userSession.name);
+        sessionStorage.setItem("picture", userSession.picture);
+        sessionStorage.setItem("role", user.role || "user");
+        sessionStorage.setItem("id", user._id);
+            
+      }
       }
     }
 

@@ -1,0 +1,13 @@
+{
+  "name": "Alumni Connect",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:18",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 5000],
+  "postCreateCommand": "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install git-lfs && git lfs install && cd frontend && npm install --legacy-peer-deps && cd ../backend && npm install"
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableHead,
@@ -7,10 +7,9 @@ import {
   TablePagination,
   TableSortLabel
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 export default function useTable(records, headCells, filterFn) {
-  const theme = useTheme();
+
   const [page, setPage] = useState(0);
   const pages = [5, 10, 25];
   const [rowsPerPage, setRowsPerPage] = useState(pages[0]);

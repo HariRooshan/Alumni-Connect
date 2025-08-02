@@ -33,7 +33,7 @@ import AdminHome from "./components/AdminHome";
 import AdminGallery from "./components/Admingallery";
 import MentorshipHome from "./components/Mentorship/Home";
 import MentorshipGuidelines from "./components/Mentorship/Guidelines";
-import MentorshipLogin from "./components/Mentorship/Login";
+// import MentorshipLogin from "./components/Mentorship/Login";
 import MentorshipDashboard from "./components/Mentorship/Dashboard";
 import RegistrationForm from "./components/Mentorship/RegistrationForm.jsx";
 import Step1 from "./components/Mentorship/step1.jsx";
@@ -95,7 +95,7 @@ function AppWithNavBar() {
           <Route path="/admin-event" element={<AdminPage />} />
           <Route path="/mentorship" element={<MentorshipHome />} />
           <Route path="/mentorship/guidelines" element={<MentorshipGuidelines />} />
-          <Route path="/mentorship/login" element={<MentorshipLogin />}/>
+          {/* <Route path="/mentorship/login" element={<MentorshipLogin />}/> */}
           <Route path="/mentorship/dashboard" element={<MentorshipDashboard />} />
           <Route path="/mentorship/register" element={<RegistrationForm />} />
           <Route path="/mentorship/main" element={<Main />} />

@@ -48,12 +48,16 @@ const storage = multer.diskStorage({
   },
 });
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  if (
+    file.mimetype.startsWith('image/') ||
+    file.mimetype === 'application/pdf'
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Only image files are allowed"), false);
+    cb(new Error('Only images and PDFs are allowed!'), false);
   }
 };
+
 const upload = multer({ storage, fileFilter });
 
 // Import controller functions
@@ -64,5 +68,5 @@ router.get("/", eventController.getAllEvents);
 router.post("/", upload.single("attachment"), eventController.createEvent);
 router.put("/:id", upload.single("attachment"), eventController.updateEvent);
 router.delete("/:id", eventController.deleteEvent);
-
+router.delete("/:id/attachment", eventController.deleteAttachment);
 module.exports = router;

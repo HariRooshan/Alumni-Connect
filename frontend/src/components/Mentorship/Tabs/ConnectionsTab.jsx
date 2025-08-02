@@ -39,6 +39,7 @@ const fetchConnections = async (email) => {
 
 const handleRequest = async (connectionId, action) => {
 
+    const userEmail = sessionStorage.getItem("email");
     console.log(connectionId);
     try {
       // setLoading(true);
@@ -61,7 +62,7 @@ const handleRequest = async (connectionId, action) => {
       setSnackbarOpen(true);
       
       if (action === "accept") {
-        fetchConnections(); // Refresh the connections list
+        fetchConnections(userEmail); // Refresh the connections list
       }
       fetchPendingRequests(); // Refresh pending requests
 
