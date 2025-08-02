@@ -1,9 +1,5 @@
-import React, { useEffect } from "react";
-import ReactDOM from "react-dom";
-// dummy changes
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
 import isTokenExpired from "./utils/authUtils"; // Utility to check token expiration
 import Footer from "./components/Footer"; 
 import Login from "./components/Login";
@@ -33,13 +29,8 @@ import AdminHome from "./components/AdminHome";
 import AdminGallery from "./components/Admingallery";
 import MentorshipHome from "./components/Mentorship/Home";
 import MentorshipGuidelines from "./components/Mentorship/Guidelines";
-// import MentorshipLogin from "./components/Mentorship/Login";
 import MentorshipDashboard from "./components/Mentorship/Dashboard";
 import RegistrationForm from "./components/Mentorship/RegistrationForm.jsx";
-import Step1 from "./components/Mentorship/step1.jsx";
-import Step2 from "./components/Mentorship/step2.jsx";
-import Step3 from "./components/Mentorship/step3.jsx";
-import Step4 from "./components/Mentorship/step4.jsx";
 import Main from "./components/Mentorship/Main.jsx";
 import AdminPage from "./components/AdminPage";
 import MentorshipChat from "./components/Mentorship/Chat.jsx";
@@ -62,7 +53,7 @@ function AppWithNavBar() {
     }
   }, [location.pathname]); // Runs on route change
 
-  const showNavbarOn = ["/", "/view-profile","/mentorship-home" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery"];
+  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery"];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -95,7 +86,6 @@ function AppWithNavBar() {
           <Route path="/admin-event" element={<AdminPage />} />
           <Route path="/mentorship" element={<MentorshipHome />} />
           <Route path="/mentorship/guidelines" element={<MentorshipGuidelines />} />
-          {/* <Route path="/mentorship/login" element={<MentorshipLogin />}/> */}
           <Route path="/mentorship/dashboard" element={<MentorshipDashboard />} />
           <Route path="/mentorship/register" element={<RegistrationForm />} />
           <Route path="/mentorship/main" element={<Main />} />
