@@ -9,5 +9,5 @@
     }
   },
   "forwardPorts": [3000, 5000],
-  "postCreateCommand": "cd frontend && npm install --legacy-peer-deps && cd ../backend && npm install"
+  "postCreateCommand": "curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install git-lfs && git lfs install && cd frontend && npm install --legacy-peer-deps && cd ../backend && npm install"
 }
