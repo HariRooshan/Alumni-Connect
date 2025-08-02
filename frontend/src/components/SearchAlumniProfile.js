@@ -15,12 +15,14 @@ import WorkIcon from '@mui/icons-material/Work';
       { key: "name", label: "Name" },
       { key: "email", label: "Email" },
       { key: "yearOfGraduation", label: "Graduation Year" },
-      { key: "programme", label: "Programme" },
+      { key: "programStudied", label: "Programme" },
       { key: "sector", label: "Sector" },
       { key: "higherStudies", label: "Higher Studies" },
       { key: "institutionName", label: "Institution" },
       { key: "job", label: "Job Title" },
       { key: "linkedinUrl", label: "LinkedIn" },
+      { key: "currentCompany", label: "Company" },           // <-- Add this
+      { key: "companyLocation", label: "Company Location" }, // <-- Add this
     ];
     const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
     const [selectedPdfColumns, setSelectedPdfColumns] = useState(allColumns.map(col => col.key));
@@ -60,21 +62,52 @@ import WorkIcon from '@mui/icons-material/Work';
       }
     };
     
-    // 🔹 Handle filter changes
-    const handleFilterChange = (e) => {
-      const { name, value } = e.target;
-    
-      setFilters((prev) => {
-        let updatedFilters = { ...prev, [name]: value.trim() === "" ? "" : value };
-    
-        // If Higher Studies is "No", reset Institution Name
-        if (name === "higherStudies" && value === "No") {
-          updatedFilters.institutionName = "";
-        }
-    
-        return updatedFilters;
-      });
-    };
+   const handleFilterChange = (e) => {
+  const { name, value } = e.target;
+
+  setFilters((prev) => {
+    let updatedFilters = { ...prev, [name]: value.trim() === "" ? "" : value };
+
+    // 🔹 If Higher Studies is "No", reset Institution Name
+    if (name === "higherStudies" && value === "No") {
+      updatedFilters.institutionName = "";
+    }
+
+    // 🔹 Handle Location Dropdown
+    if (name === "location") {
+      updatedFilters.location = value;
+
+      // ✅ If user selects "Other", keep previous customLocation
+      // ✅ If user selects a normal option, clear customLocation
+      updatedFilters.customLocation =
+        value === "Other" ? prev.customLocation || "" : "";
+    }
+
+    // 🔹 Handle Custom Location Input
+    if (name === "customLocation") {
+      updatedFilters.customLocation = value;
+    }
+
+    // 🔹 Handle Company Dropdown
+    if (name === "company") {
+      updatedFilters.company = value;
+
+      // ✅ If user selects "Other", keep previous customCompany
+      // ✅ If user selects a normal option, clear customCompany
+      updatedFilters.customCompany =
+        value === "Other" ? prev.customCompany || "" : "";
+    }
+
+    // 🔹 Handle Custom Company Input
+    if (name === "customCompany") {
+      updatedFilters.customCompany = value;
+    }
+
+    return updatedFilters;
+  });
+};
+
+
     
     // 🔹 Save search history for logged-in user
     const saveSearch = (searchQuery) => {
@@ -116,129 +149,173 @@ import WorkIcon from '@mui/icons-material/Work';
       name: "name",
       email: "email",
       yearOfGraduation: "yearOfGraduation",
-      programme: "programme",
       sector: "sector",
       higherStudies: "higherStudies",
       institutionName: "institutionName",
-      location: "location", // For future backend support
+      location: "companyLocation",
+      company: "currentCompany",
+       // For future backend support
     };
-    // 🔹 Perform search based on selected filters
-    const handleSearch = () => {
-      if (!data || data.length === 0) {
-        console.error("❌ No data available for searching.");
-        return;
-      }
-    
-      let cleanedFilters = {};
 
-      // Preprocess filters once (Avoid redundant .toLowerCase())
-      Object.keys(filters).forEach((key) => {
-        const val = filters[key] ?? "";
-        if (typeof val === "string" && val.trim() !== "") {
-          cleanedFilters[key] = val.trim().toLowerCase();
-        }
-      });
-    
-      if (Object.keys(cleanedFilters).length === 0) {
-        setFilteredData(data);
-        return;
-      }
-    
-      // *Optimized Filtering*
-      let filtered = [];
-      for (let alumni of data) {
-        let match = true; // Assume match, stop checking if false
-    
-        for (let key in cleanedFilters) {
-          let actualKey = keyMapping[key] || key;
-          let alumniValue = alumni[actualKey] ? alumni[actualKey].toString().toLowerCase() : "";
+ const handleSearch = () => {
+  if (!data || data.length === 0) {
+    console.error("❌ No data available for searching.");
+    return;
+  }
 
-          if (actualKey === "higherStudies") {
-            if (alumniValue !== cleanedFilters[key]) {
-              match = false;
-              break;
-            }
-          } else if (actualKey === "location" || actualKey === "customLocation") {
-            // For now, skip filtering for location/customLocation
-            continue;
-          } else {
-            if (!alumniValue.startsWith(cleanedFilters[key])) {
-              match = false;
-              break;
-            }
-          }
+  let cleanedFilters = {};
+
+  // ✅ Handle Location
+  if (filters.customLocation?.trim()) {
+    cleanedFilters.companyLocation = filters.customLocation.trim().toLowerCase();
+  } else if (filters.location?.trim() && filters.location.toLowerCase() !== "other") {
+    cleanedFilters.companyLocation = filters.location.trim().toLowerCase();
+  }
+
+  // ✅ Handle Company
+  if (filters.customCompany?.trim()) {
+    cleanedFilters.currentCompany = filters.customCompany.trim().toLowerCase();
+  } else if (filters.company?.trim() && filters.company.toLowerCase() !== "other") {
+    cleanedFilters.currentCompany = filters.company.trim().toLowerCase();
+  }
+
+  // ✅ Handle Other Filters
+  const otherFilterKeys = [
+    "name",
+    "email",
+    "yearOfGraduation",
+    "sector",
+    "higherStudies",
+    "institutionName",
+  ];
+
+  otherFilterKeys.forEach((key) => {
+    const val = filters[key] ?? "";
+    if (typeof val === "string" && val.trim() !== "") {
+      cleanedFilters[key] = val.trim().toLowerCase();
+    }
+  });
+
+  if (Object.keys(cleanedFilters).length === 0) {
+    setFilteredData(data);
+    return;
+  }
+
+  let filtered = [];
+  for (let alumni of data) {
+    let match = true;
+
+    for (let key in cleanedFilters) {
+      let alumniValue = alumni[key] ? alumni[key].toString().toLowerCase() : "";
+
+      // ✅ Exact match for higherStudies
+      if (key === "higherStudies") {
+        if (alumniValue !== cleanedFilters[key]) {
+          match = false;
+          break;
         }
-    
-        if (match) filtered.push(alumni);
       }
+      // ✅ Partial match for location
+      else if (key === "companyLocation") {
+        if (!alumni.companyLocation?.toLowerCase().includes(cleanedFilters.companyLocation)) {
+          match = false;
+          break;
+        }
+      }
+      // ✅ Partial match for company
+      else if (key === "currentCompany") {
+        if (!alumni.currentCompany?.toLowerCase().includes(cleanedFilters.currentCompany)) {
+          match = false;
+          break;
+        }
+      }
+      // ✅ For other text fields
+      else {
+        if (!alumniValue.startsWith(cleanedFilters[key])) {
+          match = false;
+          break;
+        }
+      }
+    }
+
+    if (match) filtered.push(alumni);
+  }
+
+  console.log("Filters:", filters);
+  console.log("Cleaned Filters:", cleanedFilters);
+  console.log("🔍 Filtered Data:", filtered);
+
+  setFilteredData(filtered);
+  suggestProfile(filtered);
+  saveSearch(cleanedFilters);
+};
+
+
+
+
     
-      console.log("🔍 Filtered Data:", filtered);
-      setFilteredData(filtered);
-      suggestProfile(filtered);
-      saveSearch(cleanedFilters);
-    };
-    
-    
-    // 🔹 Suggest profile based on search filters
     const suggestProfile = (searchedResults) => {
-      if (!searchedResults || searchedResults.length === 0) {
-        console.warn("⚠ No search results found to suggest a profile.");
-        return;
-      }
-    
-      const alumniFilter = filters["Name of the alumni"];
-      const sectorFilter = filters["Sector"];
-      const gradYearFilter = filters["Year of Graduation"];
-      const higherStudiesFilter = filters["Higher Studies"];
-      const institutionFilter = filters["Institution Name"];
-    
-      // 🔹 Weight-based Scoring
-      const rankedProfiles = searchedResults.slice().sort((a, b) => {
-        let scoreA = 0, scoreB = 0;
-    
-        // Exact name match gets highest priority
-        if (alumniFilter && a["Name of the alumni"] === alumniFilter) scoreA += 3;
-        if (alumniFilter && b["Name of the alumni"] === alumniFilter) scoreB += 3;
-    
-        // Sector relevance
-        if (sectorFilter && a["Sector"] === sectorFilter) scoreA += 2;
-        if (sectorFilter && b["Sector"] === sectorFilter) scoreB += 2;
-    
-        // Graduation Year proximity (recent graduates prioritized)
-        if (gradYearFilter) {
-          const diffA = Math.abs(a["Year of Graduation"] - gradYearFilter);
-          const diffB = Math.abs(b["Year of Graduation"] - gradYearFilter);
-          scoreA += (5 - diffA); // The closer the year, the higher the score
-          scoreB += (5 - diffB);
-        }
-    
-        // Higher Studies relevance
-        if (higherStudiesFilter && a["Higher Studies"] === higherStudiesFilter) scoreA += 1;
-        if (higherStudiesFilter && b["Higher Studies"] === higherStudiesFilter) scoreB += 1;
-    
-        // Institution match (if Higher Studies = "Yes")
-        if (institutionFilter && a["Institution Name"] === institutionFilter) scoreA += 1;
-        if (institutionFilter && b["Institution Name"] === institutionFilter) scoreB += 1;
-    
-        return scoreB - scoreA; // Sort descending
-      });
-    
-      const profile = rankedProfiles[0];
-    
-      if (!profile) {
-        console.error("❌ No valid profile found to suggest.");
-        return;
-      }
-    
-      setSuggestedProfile(profile);
-      console.log("✅ Suggested Profile:", profile);
-    
-      localStorage.setItem("suggestedProfile", JSON.stringify(profile));
-    
-      // ✅ Call updateSearchCount only when a valid profile is found
-      updateSearchCount(profile);
-    };
-    
+  if (!searchedResults || searchedResults.length === 0) {
+    console.warn("⚠ No search results found to suggest a profile.");
+    return;
+  }
+
+  const alumniFilter = filters["Name of the alumni"]?.toLowerCase();
+  const sectorFilter = filters["Sector"]?.toLowerCase(); // Public / Private
+  const gradYearFilter = parseInt(filters["Year of Graduation"], 10);
+  const higherStudiesFilter = filters["Higher Studies"]?.toLowerCase();
+  const institutionFilter = filters["Institution Name"]?.toLowerCase();
+
+  const rankedProfiles = searchedResults.slice().sort((a, b) => {
+    let scoreA = 0, scoreB = 0;
+
+    // 🏷 Exact or partial name match
+    const nameA = a["Name of the alumni"]?.toLowerCase() || "";
+    const nameB = b["Name of the alumni"]?.toLowerCase() || "";
+    if (alumniFilter && nameA.includes(alumniFilter)) scoreA += 3;
+    if (alumniFilter && nameB.includes(alumniFilter)) scoreB += 3;
+
+    // 🏭 Sector (no partial matching needed)
+    const sectorA = a["Sector"]?.toLowerCase() || "";
+    const sectorB = b["Sector"]?.toLowerCase() || "";
+    if (sectorFilter && sectorA === sectorFilter) scoreA += 2;
+    if (sectorFilter && sectorB === sectorFilter) scoreB += 2;
+
+    // 🎓 Graduation Year
+    const yearA = parseInt(a["Year of Graduation"], 10);
+    const yearB = parseInt(b["Year of Graduation"], 10);
+    if (gradYearFilter) {
+      scoreA += 1 / (1 + Math.abs(yearA - gradYearFilter));
+      scoreB += 1 / (1 + Math.abs(yearB - gradYearFilter));
+    }
+
+    // 📚 Higher Studies
+    const hsA = a["Higher Studies"]?.toLowerCase() || "";
+    const hsB = b["Higher Studies"]?.toLowerCase() || "";
+    if (higherStudiesFilter && hsA === higherStudiesFilter) scoreA += 1;
+    if (higherStudiesFilter && hsB === higherStudiesFilter) scoreB += 1;
+
+    // 🏫 Institution
+    const instA = a["Institution Name"]?.toLowerCase() || "";
+    const instB = b["Institution Name"]?.toLowerCase() || "";
+    if (institutionFilter && instA.includes(institutionFilter)) scoreA += 1;
+    if (institutionFilter && instB.includes(institutionFilter)) scoreB += 1;
+
+    return scoreB - scoreA;
+  });
+
+  const profile = rankedProfiles[0];
+  if (!profile) {
+    console.error("❌ No valid profile found to suggest.");
+    return;
+  }
+
+  setSuggestedProfile(profile);
+  console.log("✅ Suggested Profile:", profile);
+  localStorage.setItem("suggestedProfile", JSON.stringify(profile));
+  updateSearchCount(profile);
+};
+ 
     
 const loadSuggestedProfile = () => {
 const savedProfile = JSON.parse(localStorage.getItem("suggestedProfile"));
@@ -737,67 +814,47 @@ return (
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            {filteredData.length > 0 && (() => {
-              const keys = Object.keys(filteredData[0]).filter((key) => key !== "_id");
-              const keysWithoutLinkedIn = keys.filter(k => k !== 'linkedinUrl');
-              if (keys.includes('linkedinUrl')) keysWithoutLinkedIn.push('linkedinUrl');
-              return keysWithoutLinkedIn.map((key) => (
-                <TableCell
-                  key={key}
-                  sx={{
-                    bgcolor: "#6a0dad",
-                    color: "white",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    ...(key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
-                  }}
-                >
-                  {{
-                    rollNumber: "Roll No.",
-                    email: "Email",
-                    name: "Name",
-                    yearOfGraduation: "Graduation Year",
-                    linkedinUrl: "LinkedIn",
-                    job: "Job",
-                    sector: "Sector",
-                    higherStudies: "Higher Studies",
-                    institutionName: "Higher Studies Institution",
-                  }[key] || key}
-                </TableCell>
-              ));
-            })()}
+            {allColumns.map((col) => (
+              <TableCell
+                key={col.key}
+                sx={{
+                  bgcolor: "#6a0dad",
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  ...(col.key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
+                }}
+              >
+                {col.label}
+              </TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {filteredData.length > 0 ? (
-            filteredData.map((alumni, index) => {
-              const keys = Object.keys(alumni).filter((key) => key !== "_id");
-              const keysWithoutLinkedIn = keys.filter(k => k !== 'linkedinUrl');
-              if (keys.includes('linkedinUrl')) keysWithoutLinkedIn.push('linkedinUrl');
-              return (
-                <TableRow key={index}>
-                  {keysWithoutLinkedIn.map((key, idx) => (
-                    <TableCell
-                      key={idx}
-                      sx={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        ...(key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
-                      }}
-                    >
-                      {alumni[key] || "N/A"}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })
+            filteredData.map((alumni, index) => (
+              <TableRow key={index}>
+                {allColumns.map((col, idx) => (
+                  <TableCell
+                    key={idx}
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      ...(col.key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
+                    }}
+                  >
+                    {alumni[col.key] || "N/A"}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : (
             <TableRow>
-              <TableCell colSpan="100%" sx={{ textAlign: "center" }}>
+              <TableCell colSpan={allColumns.length} sx={{ textAlign: "center" }}>
                 No results found
               </TableCell>
             </TableRow>
