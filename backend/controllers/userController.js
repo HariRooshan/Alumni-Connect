@@ -108,16 +108,44 @@ const fetchUserProfileById = async (req, res) => {
   }
 };
 
+const updateUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const updateData = req.body;
+
+    console.log("Updating user profile for ID:", userId);
+    // Find user by ID and update with new data
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const leaveProgram = async (req, res) => {
     try {
       const { userId } = req.params;
   
+      await User.updateMany(
+        { connections: userId },
+        { $pull: { connections: userId } }
+      );
       await User.findByIdAndDelete(userId);
   
       res.status(200).json({ message: "User removed from mentorship program" });
     } catch (error) {
       console.error("Error removing user:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Failed to delete serverr" });
     }
   };
 
@@ -128,5 +156,6 @@ module.exports = {
     registerUser,
     getUserByEmail,
     fetchUserProfileById,
+    updateUserProfile,
     leaveProgram
 };

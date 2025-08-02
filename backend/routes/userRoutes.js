@@ -1,5 +1,5 @@
 const express = require("express");
-const {getCount,getUsersByRole,registerUser,getUserByEmail,fetchUserProfileById,leaveProgram} = require("../controllers/userController")
+const {getCount,getUsersByRole,registerUser,getUserByEmail,fetchUserProfileById,updateUserProfile,leaveProgram} = require("../controllers/userController")
 
 const router = express.Router();
 
@@ -17,6 +17,9 @@ router.get("/list/:role", getUsersByRole);
 
 // ✅ Fetch User Profile by ID
 router.get("/profile/:userId", fetchUserProfileById);
+
+// ✅ Update User Profile
+router.put("/update/:userId", updateUserProfile);
 
 // ✅ Remove User from Mentorship Program
 router.delete("/leave-program/:userId", leaveProgram);
