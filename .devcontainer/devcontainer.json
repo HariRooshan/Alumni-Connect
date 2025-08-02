@@ -1,0 +1,11 @@
+{
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "postCreateCommand": "cd frontend && npm install --legacy-peer-deps && cd ../backend && npm install"
+}
