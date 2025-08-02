@@ -27,12 +27,12 @@ function Gallery() {
   // const token = localStorage.getItem("token");
   // const userRole = decodeToken(token).role;
   const token = localStorage.getItem("token");
-  
+
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
       userRole = decodedToken.role || "";
-     
+
     } catch (error) {
       console.error("Error decoding token:", error);
     }
@@ -84,11 +84,31 @@ function Gallery() {
 
   const handleFileSelection = (event) => {
     const files = Array.from(event.target.files);
-    const newImages = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setSelectedImages((prevImages) => [...prevImages, ...newImages]);
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    const validImages = [];
+    let errorMsg = "";
+
+    files.forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        errorMsg = "Only JPEG, JPG, PNG, or WEBP images are allowed.";
+      } else if (file.size > maxSize) {
+        errorMsg = "Each image must be less than 5MB.";
+      } else {
+        validImages.push({
+          file,
+          preview: URL.createObjectURL(file),
+        });
+      }
+    });
+
+    if (errorMsg) {
+      alert(errorMsg);
+      return;
+    }
+
+    setSelectedImages((prevImages) => [...prevImages, ...validImages]);
   };
 
   const removeSelectedImage = (index) => {
@@ -144,7 +164,7 @@ function Gallery() {
   return (
     <Box sx={{ textAlign: "center", p: 2 }}>
       {/* Show Upload Button only if userRole is "Alumni" */}
-      {userRole === "Alumni" && (
+      {(userRole === "Alumni" || userRole === "Admin") && (
         <Button
           variant="contained"
           startIcon={<PhotoCamera />}
@@ -282,11 +302,24 @@ function Gallery() {
               <Grid item key={index} xs={4}>
                 <Box sx={{ position: "relative" }}>
                   <IconButton
-                    sx={{ position: "absolute", top: -5, right: -5 }}
+                    sx={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      zIndex: 2,
+                      background: "rgba(255,255,255,0.92)",
+                      boxShadow: 2,
+                      border: "2px solid #fff",
+                      transition: "background 0.2s, color 0.2s",
+                      "&:hover": {
+                        background: "#d32f2f",
+                        color: "#fff",
+                      },
+                    }}
                     size="small"
                     onClick={() => removeSelectedImage(index)}
                   >
-                    <Delete />
+                    <Delete fontSize="small" />
                   </IconButton>
                   <Card>
                     <CardMedia component="img" height="100" image={img.preview} alt="Selected" />

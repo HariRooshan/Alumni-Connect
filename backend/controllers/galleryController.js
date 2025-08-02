@@ -86,7 +86,8 @@ export const getAllPhotos = (req, res) => {
   const albumsPath = 'uploads/albums/';
   let allPhotos = [];
   let captionsData = {};
-  
+
+  // Load captions
   const captionsFile = path.join(allPhotosPath, 'captions.json');
   if (fs.existsSync(captionsFile)) {
     try {
@@ -96,31 +97,44 @@ export const getAllPhotos = (req, res) => {
     }
   }
 
+  // Helper function to load images with timestamp
+  function loadDirWithTimestamp(dirRel, webBase, albumName = null) {
+  // Use process.cwd() to resolve from project root
+  const dir = path.resolve(process.cwd(), dirRel);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter(f => /\.(png|jpe?g|webp)$/i.test(f))
+    .map(filename => {
+      const full = path.join(dir, filename);
+      const stat = fs.statSync(full);
+      return {
+        filename,
+        src: `${webBase}/${filename}`,
+        caption: albumName ? albumName : (captionsData[filename] || ""),
+        mtimeMs: stat.mtimeMs
+      };
+    });
+}
+
+  // Load standalone photos
   if (fs.existsSync(allPhotosPath)) {
-    const files = fs.readdirSync(allPhotosPath).filter(file => /\.(png|jpg|jpeg|gif|bmp|svg)$/i.test(file));
-    allPhotos = files.map(file => ({
-      filename: file,
-      src: `http://localhost:5000/allPhotos/${file}`,
-      caption: captionsData[file] || ""
-    }));
+    allPhotos.push(...loadDirWithTimestamp(allPhotosPath, 'http://localhost:5000/allPhotos'));
   }
 
+  // Load album photos
   if (fs.existsSync(albumsPath)) {
     const albums = fs.readdirSync(albumsPath);
     albums.forEach(album => {
-      const albumPath = path.join(albumsPath, album);
-      if (fs.existsSync(albumPath)) {
-        const files = fs.readdirSync(albumPath).filter(file => /\.(png|jpg|jpeg|gif|bmp|svg)$/i.test(file));
-        files.forEach(file => {
-          allPhotos.push({
-            filename: file,
-            src: `http://localhost:5000/albums/${album}/${file}`,
-            caption: album
-          });
-        });
-      }
+      const albumRelPath = path.join(albumsPath, album);
+      allPhotos.push(
+        ...loadDirWithTimestamp(albumRelPath, `http://localhost:5000/albums/${album}`, album)
+      );
     });
   }
+
+  // Sort by most recent
+  allPhotos.sort((a, b) => b.mtimeMs - a.mtimeMs);
 
   res.status(200).json({ photos: allPhotos });
 };
