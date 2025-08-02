@@ -1,14 +1,12 @@
-import React,{useState} from "react";
-import { AppBar, Toolbar, Typography, Button, Container, Grid, Box, Paper } from "@mui/material";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import {useState} from "react";
+import { Typography, Button, Container, Grid, Box, Paper } from "@mui/material";
+import { Outlet } from "react-router-dom";
 import Navbar from "../NavBar";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 
 function MentorshipGuidelines() {
-  // const location = useLocation();
-  // const isParentRoute = location.pathname === "/mentorship-home"; // Check if on the parent `/mentorship` route
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   if(!token){
@@ -20,21 +18,6 @@ function MentorshipGuidelines() {
   const [alertType, setAlertType] = useState("success"); // Decode safely
   let EMAIL_ID = decodedToken.email; // Extract email
   console.log("User Email:", EMAIL_ID);
-  let userRole = decodedToken.role;
-  // const fetchMemberCount = async () => {
-  //   try{
-  //     const response = await fetch("http://localhost:5000/api/users/getUserByEmail");
-  //     if(response.status === 404){
-  //       console.log("Error 404 : No data found");
-  //     }
-  //     const result = await response.json();
-  //     setMentorCount();
-  //     setMenteeCount(result.menteeCount);
-  //     setTotalUsers(result.totalUsers);
-  //   } catch (error) {
-  //     console.error("Error fetching user counts:", error);
-  //   }
-  // }
   const check_user = async () => {
   try {
     if (!EMAIL_ID) {
@@ -98,36 +81,18 @@ function MentorshipGuidelines() {
 
   return (
     <>
-      {/* Navigation Bar */}
-      {/* <AppBar position="static" sx={{ background: "linear-gradient(to right, #4a00e0, #8e2de2)" }}>
-        <Toolbar>
-          <img 
-            src={Logo} 
-            alt="Logo" 
-            style={{ height: "40px", marginRight: "10px" }}
-          />
-          <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-            Alumni-Student Portal
-          </Typography>
-          <Button color="inherit" component={Link} to="/">Home</Button>
-          <Button color="inherit" component={Link} to="/mentorship/login">Login</Button>
-          <Button color="inherit" component={Link} to="/mentorship">Mentorship</Button>
-        </Toolbar>
-      </AppBar> */}
-
       <Navbar/>
-
       {/* Main Content */}
       {(
-        <Container maxWidth="lg" style={{ marginTop: "30px" }}>
+        <Container maxWidth="lg" style={{ marginTop: "90px" }}>
           {/* Title */}
           <Typography variant="h4" align="center" gutterBottom>
             Mentorship Program
           </Typography>
 
           {/* Guidelines Section */}
-          <Grid container spacing={4} style={{ marginTop: "20px" }}>
-            <Grid item xs={12} md={6}>
+          <Grid container spacing={4} style={{ marginTop: "10px" }} justifyContent="center">
+            <Grid item xs={12} md={5}>
               <Paper elevation={3} style={{ padding: "20px" }}>
                 <Typography variant="h5" gutterBottom>
                   <b>Guidelines for Mentors</b>
@@ -140,7 +105,7 @@ function MentorshipGuidelines() {
                 </Typography>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={5}>
               <Paper elevation={3} style={{ padding: "20px" }}>
                 <Typography variant="h5" gutterBottom>
                   <b>Guidelines for Mentees</b>
