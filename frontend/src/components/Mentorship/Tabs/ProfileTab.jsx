@@ -18,10 +18,10 @@ const ProfileTab = () => {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [formData, setFormData] = useState({});
-  const [editData, setEditData] = useState({});
   const [activeStep, setActiveStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,7 +46,6 @@ const ProfileTab = () => {
 
   const handleEditOpen = () => {
     setFormData(profile); // Ensure formData is prefilled with profile details
-    setEditData(profile);  // Pre-fill with profile data
     setActiveStep(0);
     setEditOpen(true);
   };
@@ -82,23 +81,37 @@ const ProfileTab = () => {
     }
   };
 
-  // Example function in your ProfileTab.jsx
   const handleLeaveProgram = async () => {
-    if (window.confirm("Are you sure you want to leave the mentorship program? This action cannot be undone.")) {
-      try {
-        const res = await fetch(`http://localhost:5000/api/users/leave-program/${userId}`, {
-          method: "DELETE",
-        });
-        if (res.ok) {
-          // Optionally clear session and redirect
-          sessionStorage.clear();
-          navigate("/mentorship"); // or your landing page
-        }
-      } catch (err) {
-        // Show error snackbar
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/leave-program/${userId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        sessionStorage.clear();
+        navigate("/mentorship");
       }
+    } catch (err) {
+      // Show error snackbar
     }
   };
+
+  // Example function in your ProfileTab.jsx
+  // const handleLeaveProgram = async () => {
+  //   if (window.confirm("Are you sure you want to leave the mentorship program? This action cannot be undone.")) {
+  //     try {
+  //       const res = await fetch(`http://localhost:5000/api/users/leave-program/${userId}`, {
+  //         method: "DELETE",
+  //       });
+  //       if (res.ok) {
+  //         // Optionally clear session and redirect
+  //         sessionStorage.clear();
+  //         navigate("/mentorship"); // or your landing page
+  //       }
+  //     } catch (err) {
+  //       // Show error snackbar
+  //     }
+  //   }
+  // };
 
   const getStepContent = (step) => {
     switch (step) {
@@ -158,11 +171,50 @@ const ProfileTab = () => {
           variant="contained" 
           color="error" 
           sx={{borderRadius: 3 }}
-          onClick={handleLeaveProgram }
+          onClick={() => setLeaveDialogOpen(true)}
         >
           Leave Mentorship Program
         </Button>
       </Box>
+
+      {/* Leave Program Dialog */}
+      <Dialog
+        open={leaveDialogOpen}
+        onClose={() => setLeaveDialogOpen(false)}
+        maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle>
+          Confirm Leaving
+          <IconButton
+            aria-label="close"
+            onClick={() => setLeaveDialogOpen(false)}
+            sx={{ position: "absolute", right: 10, top: 10 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography>
+            Are you sure you want to leave the mentorship program? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, p: 2 }}>
+          <Button onClick={() => setLeaveDialogOpen(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              setLeaveDialogOpen(false);
+              await handleLeaveProgram();
+            }}
+            color="error"
+            variant="contained"
+          >
+            Leave
+          </Button>
+        </Box>
+      </Dialog>
 
       {/* Edit Profile Dialog */}
       <Dialog
@@ -183,11 +235,19 @@ const ProfileTab = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent dividers sx={{ p: 2, pt: 1 }}>
+        <DialogContent dividers sx={{ p: 2, pt: 3 }}>
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
-            {steps.map((label) => (
+            {steps.map((label,index) => (
               <Step key={label}>
-                <StepLabel>{label}</StepLabel>
+                <StepLabel
+                  onClick={() => setActiveStep(index)}
+                  sx={{ 
+                    cursor: "pointer", 
+                    pointerEvents: "auto", "&:hover": {cursor: "pointer"} 
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >{label}</StepLabel>
               </Step>
             ))}
           </Stepper>
