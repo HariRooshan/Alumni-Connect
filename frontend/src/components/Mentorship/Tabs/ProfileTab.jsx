@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box, Button, Typography, CircularProgress, Paper, Chip, Avatar, Dialog, DialogTitle,
   DialogContent, Stepper, Step, StepLabel, Stack, IconButton, Snackbar, Alert
@@ -21,6 +21,8 @@ const ProfileTab = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -65,17 +67,27 @@ const ProfileTab = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      console.log("save Response:", res);
       if (res.ok) {
         const updated = await res.json();
         setProfile(updated);
         setSnackbarOpen(true);
+        setSnackbarMessage("Profile updated successfully!");
+        setSnackbarSeverity("success");
         setTimeout(() => {
           setEditOpen(false);
         }, 1000)
+      } 
+      else {
+        const errData = await res.json();
+        setSnackbarMessage(errData.message || "Failed to update profile.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     } catch (err) {
       // Optionally show error
+      setSnackbarMessage("Network error while updating profile.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     } finally {
       setSaving(false);
     }
@@ -90,28 +102,19 @@ const ProfileTab = () => {
         sessionStorage.clear();
         navigate("/mentorship");
       }
+      else {
+        const errData = await res.json();
+        setSnackbarMessage(errData.message || "Failed to leave program.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
     } catch (err) {
       // Show error snackbar
+      setSnackbarMessage("Network error while leaving program.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
-
-  // Example function in your ProfileTab.jsx
-  // const handleLeaveProgram = async () => {
-  //   if (window.confirm("Are you sure you want to leave the mentorship program? This action cannot be undone.")) {
-  //     try {
-  //       const res = await fetch(`http://localhost:5000/api/users/leave-program/${userId}`, {
-  //         method: "DELETE",
-  //       });
-  //       if (res.ok) {
-  //         // Optionally clear session and redirect
-  //         sessionStorage.clear();
-  //         navigate("/mentorship"); // or your landing page
-  //       }
-  //     } catch (err) {
-  //       // Show error snackbar
-  //     }
-  //   }
-  // };
 
   const getStepContent = (step) => {
     switch (step) {
@@ -253,7 +256,6 @@ const ProfileTab = () => {
           </Stepper>
           {getStepContent(activeStep)}
         </DialogContent>
-        {/* If your step components already have navigation buttons, you can omit DialogActions here */}
       </Dialog>
 
       <Snackbar
@@ -262,8 +264,8 @@ const ProfileTab = () => {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: "100%" }}>
-          Profile updated successfully!
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: "100%" }}>
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </Paper>
