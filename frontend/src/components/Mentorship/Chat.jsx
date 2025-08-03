@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom"; // ⬅️ Add this
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { format, isToday, isYesterday } from "date-fns";
+import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
 
 // Connect to backend socket
 const socket = io("http://localhost:5000");
@@ -101,26 +100,76 @@ const Chat = () => {
             </Typography>
 
             <Paper sx={{ height: 400, overflowY: "auto", padding: 2, mb: 2 }}>
-                {messages.length === 0 ? (
-                    <Typography>No messages yet.</Typography>
-                ) : (
-                    messages.map((msg, index) => (
-                        <Box
-                            key={index}
+            {messages.length === 0 ? (
+                <Typography>No messages yet.</Typography>
+            ) : (
+                (() => {
+                let lastDate = null;
+                return messages.map((msg, index) => {
+                    const msgDate = new Date(msg.timestamp);
+                    const dateLabel = isToday(msgDate)
+                    ? "Today"
+                    : isYesterday(msgDate)
+                    ? "Yesterday"
+                    : format(msgDate, "dd MMM yyyy");
+                    const showDateDivider = !lastDate || format(msgDate, "yyyy-MM-dd") !== format(lastDate, "yyyy-MM-dd");
+                    lastDate = msgDate;
+                    const isSender = msg.senderId._id === currentUserId;
+                    return (
+                    <div key={index}>
+                        {showDateDivider && (
+                        <Box sx={{ textAlign: "center", my: 1 }}>
+                            <Typography
+                            variant="caption"
                             sx={{
-                                mb: 1,
-                                textAlign: msg.senderId._id === currentUserId ? "right" : "left",
+                                background: "#e0e0e0",
+                                borderRadius: 2,
+                                px: 2,
+                                py: 0.5,
+                                color: "#555",
+                                fontWeight: 600,
                             }}
-                        >
-                            <Typography sx={{ fontSize: 14, fontWeight: "bold" }}>
-                                {msg.senderId._id === currentUserId ? "You" : `${msg.senderId.firstName} ${msg.senderId.lastName}`}
-                            </Typography>
-                            <Typography sx={{ wordBreak: "break-word", backgroundColor: "#f1f1f1", p: 1, borderRadius: 1 }}>
-                                {msg.message}
+                            >
+                            {dateLabel}
                             </Typography>
                         </Box>
-                    ))
-                )}
+                        )}
+                        <Box
+                        sx={{
+                            textAlign: isSender ? "right" : "left",
+                        }}
+                        >
+                        <Typography sx={{ fontSize: 14, fontWeight: "bold" }}>
+                            {isSender ? "You" : `${msg.senderId.firstName} ${msg.senderId.lastName}`}
+                        </Typography>
+                        <Box sx={{ display: "inline-block", maxWidth: "80%" }}>
+                            <Typography
+                            sx={{
+                                wordBreak: "break-word",
+                                backgroundColor: "#f1f1f1",
+                                p: 1,
+                                borderRadius: 1,
+                                display: "inline-block",
+                            }}
+                            >
+                            {msg.message}
+                            <span style={{
+                                fontSize: 11,
+                                color: "#888",
+                                marginLeft: 10,
+                                marginTop: 8,
+                                float: "right",
+                            }}>
+                                {format(msgDate, "hh:mm a")}
+                            </span>
+                            </Typography>
+                        </Box>
+                        </Box>
+                    </div>
+                    );
+                });
+                })()
+            )}
             </Paper>
 
             <TextField
