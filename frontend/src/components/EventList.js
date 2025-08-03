@@ -16,7 +16,13 @@ const EventList = () => {
   const [eventTypeFilter, setEventTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date-newest");
-
+  const [contact, setContact] = useState({ email: "", phone: "" });
+  
+    useEffect(() => {
+      axios.get("http://localhost:5000/api/admin/getcontact")
+        .then(response => setContact(response.data))
+        .catch(error => console.error("Error fetching contact info:", error));
+    }, []);
   useEffect(() => {
     axios.get("http://localhost:5000/api/events")
       .then((response) => {
@@ -226,10 +232,10 @@ const EventList = () => {
                   📞 Contact
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Phone:</strong> 9000000000
+                  <strong>Phone:</strong> {contact.email}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Email:</strong> alumni.events@example.com
+                  <strong>Email:</strong> {contact.phone}
                 </Typography>
               </Box>
             </DialogContent>
