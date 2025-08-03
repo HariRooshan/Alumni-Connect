@@ -31,7 +31,13 @@ const Footer = () => {
             </Typography>
             <Typography variant="body2">{contact.phone || "Loading..."}</Typography>
           </Grid>
-
+          <Grid>
+          <Typography variant="body1" fontWeight="bold">
+              <Link href="/developers-info" color="inherit" underline="hover">
+                Developers Info
+              </Link>
+            </Typography>
+        </Grid>
           <Grid item xs={12} md="auto">
             <Typography variant="body1" fontWeight="bold">
               <Link href="/privacy-policy" color="inherit" underline="hover">
