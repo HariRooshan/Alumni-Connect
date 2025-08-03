@@ -13,7 +13,8 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules";
+import axios from "axios";
 
 const HomePage = () => {
   const token = localStorage.getItem("token");
@@ -21,20 +22,21 @@ const HomePage = () => {
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const [validatedPhotos, setValidatedPhotos] = useState([]);
+  const backendURL = "http://localhost:5000";
+  const API_URL = "http://localhost:5000/api/gallery";
 
   useEffect(() => {
     // Fetch gallery images
-    const fetchGalleryImages = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/gallery/photos");
-        const data = await response.json();
-        if (data.photos && data.photos.length > 0) {
-          setGalleryImages(data.photos.sort(() => 0.5 - Math.random()).slice(0, 10));
-        }
-      } catch (error) {
-        console.error("Error fetching gallery images:", error);
-      }
-    };
+  const fetchPhotos = async () => {
+  try {
+    const validatedRes = await axios.get(`${API_URL}/photos?validated=true`);
+    setValidatedPhotos(validatedRes.data.photos);
+  } catch (err) {
+    console.error("Error fetching photos", err);
+  }
+};
+
 
     // Fetch events
     const fetchEvents = async () => {
@@ -54,7 +56,7 @@ const HomePage = () => {
       }
     };
 
-    fetchGalleryImages();
+    fetchPhotos();
     fetchEvents();
   }, []);
 
@@ -116,7 +118,7 @@ const HomePage = () => {
       </Container>
 
       {/* Main Content Grid */}
-      <Container sx={{mb:3}}>
+      <Container sx={{ mb: 3 }}>
         <Grid container spacing={4} justifyContent="center">
           {/* Upcoming Events Section with Fade Transition */}
           <Grid item xs={12} md={4}>
@@ -162,44 +164,49 @@ const HomePage = () => {
           </Grid>
 
           {/* Gallery Slideshow */}
-          <Grid item xs={12} md={4}>
-            <Swiper
-              navigation={true}
-              modules={[Navigation]}
-              style={{
-                borderRadius: "8px",
-                boxShadow: "0px 4px 10px rgba(0,0,0,0.2)"
-              }}
-            >
-              {galleryImages.length > 0 ? (
-                galleryImages.map((image, index) => (
-                  <SwiperSlide key={index}>
-                    <img
-                      src={image.src}
-                      alt={image.filename}
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        objectFit: "cover"
-                      }}
-                    />
-                  </SwiperSlide>
-                ))
-              ) : (
-                <SwiperSlide>
-                  <img
-                    src="/placeholder.svg"
-                    alt="No images available"
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "cover"
-                    }}
-                  />
-                </SwiperSlide>
-              )}
-            </Swiper>
-          </Grid>
+         <Grid item xs={12} md={4}>
+  <Swiper
+    navigation={true}
+    autoplay={{
+      delay: 3000, // 3 seconds
+      disableOnInteraction: false
+    }}
+    modules={[Navigation, Autoplay]}
+    style={{
+      borderRadius: "8px",
+      boxShadow: "0px 4px 10px rgba(0,0,0,0.2)"
+    }}
+  >
+    {validatedPhotos.length > 0 ? (
+      validatedPhotos.map((photo, index) => (
+        <SwiperSlide key={index}>
+          <img
+            src={`${backendURL}${photo.src}`}
+            alt={photo.caption || `Photo ${index + 1}`}
+            style={{
+              width: "100%",
+              height: "200px",
+              objectFit: "cover"
+            }}
+          />
+        </SwiperSlide>
+      ))
+    ) : (
+      <SwiperSlide>
+        <img
+          src="/placeholder.svg"
+          alt="No images available"
+          style={{
+            width: "100%",
+            height: "200px",
+            objectFit: "cover"
+          }}
+        />
+      </SwiperSlide>
+    )}
+  </Swiper>
+</Grid>
+
 
           {/* Alumni Access Section */}
           {!token && (

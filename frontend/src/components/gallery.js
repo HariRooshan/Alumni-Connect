@@ -1,31 +1,19 @@
 import { useState, useEffect } from "react";
-import { 
-  Box, Button, Card, CardMedia, CardContent, Typography, Dialog, DialogContent, 
-  TextField, Tabs, Tab, Grid, CircularProgress, IconButton 
+import {
+  Box, Button, Card, CardMedia, CardContent, Typography, Dialog, DialogContent,
+  TextField, Tabs, Tab, Grid, CircularProgress, IconButton
 } from "@mui/material";
 import { PhotoCamera, Close, Delete, ArrowBack, ArrowForward } from "@mui/icons-material";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 const API_URL = "http://localhost:5000/api/gallery"; // Backend URL
 
 function Gallery() {
-  // Hardcoded user role.
-  // Only "Alumni" can see the upload button and only "Admin" can delete photos.
-  // Uncomment the lines below to decode the role from the token stored in localStorage.
-  let userRole = "Students"; // Change to "Admin" to test Admin functionalities
-  // const decodeToken = (token) => {
-  //   try {
-  //     if (!token) return null;
-  //     const decoded = jwtDecode(token);
-  //     return decoded; // Returns the payload of the JWT
-  //   } catch (error) {
-  //     console.error("Invalid token:", error);
-  //     return null;
-  //   }
-  // };
-  // const token = localStorage.getItem("token");
-  // const userRole = decodeToken(token).role;
+
+  let userRole = "Students";
   const token = localStorage.getItem("token");
 
   if (token) {
@@ -50,11 +38,12 @@ function Gallery() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [loadingAlbums, setLoadingAlbums] = useState(true);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   // State for "All Photos" popup viewer
   const [allPhotosPopupOpen, setAllPhotosPopupOpen] = useState(false);
   const [allPhotosSliderIndex, setAllPhotosSliderIndex] = useState(0);
-
+  const backendURL = "http://localhost:5000";
   useEffect(() => {
     fetchAllPhotos();
     fetchAlbums();
@@ -63,7 +52,7 @@ function Gallery() {
   const fetchAllPhotos = async () => {
     setLoadingPhotos(true);
     try {
-      const res = await axios.get(`${API_URL}/photos`);
+      const res = await axios.get(`${API_URL}/photos?validated=true`);
       setAllPhotos(res.data.photos);
     } catch (err) {
       console.error("Error fetching photos", err);
@@ -120,26 +109,36 @@ function Gallery() {
     if (selectedImages.length === 0) return;
     const formData = new FormData();
 
-    if (selectedImages.length === 1) {
-      formData.append("photo", selectedImages[0].file);
-      formData.append("caption", caption);
-      await axios.post(`${API_URL}/uploadSingle`, formData);
-    } else {
-      if (!albumName) {
-        alert("Enter Album Name for Multiple Images");
-        return;
+    try {
+      if (selectedImages.length === 1) {
+        formData.append("photo", selectedImages[0].file);
+        formData.append("caption", caption);
+        await axios.post(`${API_URL}/uploadSingle`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+      } else {
+        if (!albumName) {
+          alert("Enter Album Name for Multiple Images");
+          return;
+        }
+        formData.append("album", albumName);
+        selectedImages.forEach(({ file }) => formData.append("photos", file));
+        await axios.post(`${API_URL}/uploadAlbum`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
       }
-      formData.append("album", albumName);
-      selectedImages.forEach(({ file }) => formData.append("photos", file));
-      await axios.post(`${API_URL}/uploadAlbum`, formData);
+      // After successful upload, refresh gallery and albums
+      setUploadDialogOpen(false);
+      setSelectedImages([]);
+      setAlbumName("");
+      setCaption("");
+      fetchAllPhotos();
+      fetchAlbums();
+      setUploadSuccess(true);
+    } catch (err) {
+      alert("Upload failed. Please try again.");
+      console.error("Upload error:", err);
     }
-
-    setUploadDialogOpen(false);
-    setSelectedImages([]);
-    setAlbumName("");
-    setCaption("");
-    fetchAllPhotos();
-    fetchAlbums();
   };
 
   const openAlbum = async (albumName) => {
@@ -189,36 +188,78 @@ function Gallery() {
       {tabIndex === 0 &&
         (loadingPhotos ? (
           <CircularProgress />
+        ) : allPhotos.length === 0 ? (
+          <Typography color="text.secondary" sx={{ my: 4 }}>
+            No photos available.
+          </Typography>
         ) : (
           <Grid container spacing={2} justifyContent="center">
             {allPhotos.map((photo, index) => (
               <Grid item key={index} xs={12} sm={4} sx={{ position: "relative" }}>
-                <Card sx={{ cursor: "pointer" }}>
-                  {/* If userRole is "Admin", show delete icon */}
+                <Card sx={{ cursor: "pointer", height: 157, display: "flex", flexDirection: "column" }}>
                   <CardMedia
                     component="img"
-                    height="140"
-                    image={photo.src}
+                    image={`${backendURL}${photo.src}`}
                     alt="Uploaded Photo"
                     loading="lazy"
                     onClick={() => {
                       setAllPhotosSliderIndex(index);
                       setAllPhotosPopupOpen(true);
                     }}
+                    sx={{
+                      height: photo.caption ? 120 : 160,
+                      objectFit: "cover",
+                      borderTopLeftRadius: 12,
+                      borderTopRightRadius: 12,
+                      background: "#f5f5f5",
+                      flexShrink: 0,
+                    }}
                   />
-                  <CardContent>
-                    <Typography variant="body2">{photo.caption}</Typography>
-                  </CardContent>
+                  {photo.caption && (
+                    <CardContent
+                      sx={{
+                        height: 40, // slightly taller for padding
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "#fafafa",
+                        borderBottomLeftRadius: 12,
+                        borderBottomRightRadius: 12,
+                        overflow: "hidden",
+                        p: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          width: "100%",
+                          textAlign: "center",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "0.9rem"
+                        }}
+                      >
+                        {photo.caption}
+                      </Typography>
+                    </CardContent>
+                  )}
                 </Card>
               </Grid>
             ))}
           </Grid>
+
         ))}
 
       {/* Albums View */}
       {tabIndex === 1 &&
         (loadingAlbums ? (
           <CircularProgress />
+        ) : albums.length === 0 ? (
+          <Typography color="text.secondary" sx={{ my: 4 }}>
+            No albums available.
+          </Typography>
         ) : (
           <Grid container spacing={2} justifyContent="center">
             {albums.map((album) => (
@@ -227,7 +268,7 @@ function Gallery() {
                   <CardMedia
                     component="img"
                     height="140"
-                    image={album.coverImage}
+                    image={`${backendURL}${album.coverImage}`}
                     alt={album.albumName}
                     loading="lazy"
                   />
@@ -296,7 +337,7 @@ function Gallery() {
             </Button>
           </label>
 
-          {/* Preview Selected Images */}
+
           <Grid container spacing={2} justifyContent="center">
             {selectedImages.map((img, index) => (
               <Grid item key={index} xs={4}>
@@ -366,7 +407,7 @@ function Gallery() {
               </IconButton>
               <Box
                 component="img"
-                src={albumPhotos[sliderIndex].src}
+                src={`${backendURL}${albumPhotos[sliderIndex].src}`}
                 alt="Album Image"
                 sx={{ maxWidth: "100%", maxHeight: "80vh" }}
               />
@@ -416,7 +457,7 @@ function Gallery() {
               </IconButton>
               <Box
                 component="img"
-                src={allPhotos[allPhotosSliderIndex].src}
+                src={`${backendURL}${allPhotos[allPhotosSliderIndex].src}`}
                 alt="Photo Viewer"
                 sx={{ maxWidth: "100%", maxHeight: "80vh" }}
               />
@@ -444,6 +485,16 @@ function Gallery() {
           )}
         </DialogContent>
       </Dialog>
+      <Snackbar
+        open={uploadSuccess}
+        autoHideDuration={5000}
+        onClose={() => setUploadSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setUploadSuccess(false)} severity="success" sx={{ width: '100%' }}>
+          Thanks for uploading! Your upload will be reviewed by the admin soon.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
