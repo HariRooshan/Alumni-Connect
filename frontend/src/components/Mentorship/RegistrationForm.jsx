@@ -20,6 +20,7 @@ const RegistrationForm = () => {
   }
   const decodedToken = jwtDecode(token);
      // Decode safely
+  console.log(decodedToken);
   let EMAIL_ID = decodedToken.email; // Extract email
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ const RegistrationForm = () => {
     education: "",
     photo:sessionStorage.getItem("picture"),
   });
-  console.log(sessionStorage);
+  console.log("1" ,sessionStorage);
 
   // Snackbar State
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -48,10 +49,11 @@ const RegistrationForm = () => {
 
   const nextStep = async(data) => {
     // Merge new data into formData
-    // console.log(data.role['role']);
+    console.log("bye");
     if(step===1)
     {
-      formData.role = data.role['role'];
+      console.log("hi");
+      formData.role = data.role && typeof data.role === "object" ? data.role['role'] : data.role || "";
     }
     formData.email = EMAIL_ID;
     const updatedFormData = { ...formData};
@@ -147,14 +149,14 @@ const RegistrationForm = () => {
   };
 
   const prevStep = () => setStep(step - 1);
-
+  console.log("Role before rendering Step1:", formData.role);
   return (
     <>
       <Navbar/>
       {/* ✅ Render Steps */}
       <Box 
         sx={{mt: step === 1 ? 19 : 14 ,mb: step === 4 ? 2 : 7}}>
-        {step === 1 && <Step1 onNext={(role) => nextStep({ role })} />}
+        {step === 1 && <Step1 onNext={(role) => nextStep({ role })} formData={formData} setFormData={setFormData} />}
         {step === 2 && <Step2 onNext={nextStep} onBack={prevStep} formData={formData} setFormData={setFormData} />}
         {step === 3 && <Step3 onNext={nextStep} onBack={prevStep} formData={formData} setFormData={setFormData} />}
         {step === 4 && <Step4 onBack={prevStep} formData={formData} setFormData={setFormData} onNext={nextStep} />}
