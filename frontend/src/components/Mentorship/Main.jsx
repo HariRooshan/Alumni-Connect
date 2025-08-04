@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { 
-  Container, Tabs, Tab, Box,  Button, AppBar, Toolbar,Alert, IconButton, Menu, MenuItem,
-  Typography, Snackbar, TextField, Avatar, Modal
+  Container, Tabs, Tab, Box,  Button, Alert, Snackbar, TextField, Modal
 } from "@mui/material";
 
-import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import { useNavigate,Link } from "react-router-dom";
-import SettingsTab from "./Tabs/SettingsTab";
+import ProfileTab from "./Tabs/ProfileTab";
 import ConnectionsTab from "./Tabs/ConnectionsTab";
 import MentorTab from "./Tabs/MentorTab";
 import MenteeTab from "./Tabs/MenteeTab";
 import Navbar from "../NavBar";
+import UserProfileDetails from "./Tabs/userProfileDetails"; 
 
 const Main = () => {
-  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState(0);
   const [user, setUser] = useState(null); 
   const [mentors, setMentors] = useState([]);
@@ -24,23 +21,6 @@ const Main = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
-
-
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  // ✅ Handle Profile Menu Open/Close
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  // ✅ Logout Function
-  const handleLogout = () => {
-    sessionStorage.removeItem("user");
-    navigate("/login");
-  };
 
   // 🔹 Load user info and fetch users
   useEffect(() => {
@@ -77,79 +57,31 @@ const Main = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ senderMail : user.email , receiverId: receiverId, msg: message }),
       });
-
-      // const emailRes = await emailReq.json();
-
-      const emailRes = await emailReq.json();
-      console.log(emailRes);
-
-
-    }
-
-    else{
+    } else{
       setAlertType("error");
     }
-
-      setSnackbarMessage(data.message);
-      setSnackbarOpen(true);
-      setSelectedUser(null); // Close modal after sending request
+    setSnackbarMessage(data.message);
+    setSnackbarOpen(true);
+    setSelectedUser(null); // Close modal after sending request
+    setMessage(""); // Clear message input
     } catch (error) {
-      console.error("Error sending request:", error);
+      setSnackbarMessage("Error sending request.");
+      setAlertType("error");
+      setSnackbarOpen(true);
     }
   };
 
-    // 🔹 Handle tab change
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
-
-  
-
   return (
-
     <>
     <Navbar/>
-    {/* ✅ Navigation Bar with Account Dropdown */}
-    <AppBar position="static" sx={{ background: "linear-gradient(to right, #4a00e0, #8e2de2)" }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-              
-          </Typography>
-
-
-          {/* ✅ User Account Dropdown */}
-          {user && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Typography variant="body1">{sessionStorage.getItem("name")}</Typography>
-              <IconButton onClick={handleMenuOpen} size="small">
-                <Avatar src={sessionStorage.getItem("picture")} alt={sessionStorage.getItem("name")} />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                sx={{ mt: 1 }}
-              >
-                <MenuItem onClick={() => navigate("/profile")}>
-                  <AccountCircleIcon sx={{ mr: 1 }} /> View Profile
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} /> Logout
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Toolbar>
-      </AppBar>
-    
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{mt:8}}>
       {/* 🔹 Tabs for Mentor and Mentee */}
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} centered>
           <Tab label="Mentors" />
           <Tab label="Mentees" />
           <Tab label="Connections" />
-          <Tab label="Settings" />
+          <Tab label="Profile" />
         </Tabs>
       </Box>
 
@@ -172,7 +104,7 @@ const Main = () => {
         setSnackbarOpen={setSnackbarOpen}/>} 
 
       {/* 🔹 Tab 3: Settings */}
-      {activeTab === 3 && <SettingsTab />}
+      {activeTab === 3 && <ProfileTab />}
 
       {/* 🔹 View More Details Modal */}
       <Modal open={!!selectedUser} onClose={() => setSelectedUser(null)}>
@@ -182,40 +114,28 @@ const Main = () => {
             bgcolor: "white", p: 4, boxShadow: 24, borderRadius: 3, width: 400
           }}
         >
-          {selectedUser && selectedUser.role === "mentor" && (
+          {selectedUser &&  (
             <>
-              <Typography variant="h6">{selectedUser.firstName} {selectedUser.lastName}</Typography>
-              <Typography>Industry: {selectedUser.industryOrDepartment}</Typography>
-              <Typography>Experience: {selectedUser.experienceOrYear}</Typography>
-              <Typography>Meeting Method: {selectedUser.meetingMethod}</Typography>
-              <Typography>Education: {selectedUser.education}</Typography>
-              {sessionStorage.getItem("role")==="mentee" && (
-                <>
-                <TextField 
-                  label="Message (Optional)" 
-                  fullWidth 
-                  value={message} 
-                  onChange={(e) => setMessage(e.target.value)} 
-                  sx={{ my: 2 }}
-                />
-                <Button variant="contained" fullWidth onClick={() => sendRequest(selectedUser._id)}>
-                  Send Connection Request
-                </Button>
-                </>
-              )}
-              <Button fullWidth sx={{ mt: 1 }} onClick={() => setSelectedUser(null)}>Close</Button>
-            </>
-          )}
-
-          {selectedUser && selectedUser.role === "mentee" && (
-            <>
-              <Typography variant="h6">{selectedUser.firstName} {selectedUser.lastName}</Typography>
-              <Typography>Department: {selectedUser.industryOrDepartment}</Typography>
-              <Typography>Year: {selectedUser.experienceOrYear}</Typography>
-              <Typography>Meeting Method: {selectedUser.meetingMethod}</Typography>
-              <Typography>Education: {selectedUser.education}</Typography>
-
-              <Button fullWidth sx={{ mt: 1 }} onClick={() => setSelectedUser(null)}>Close</Button>
+              <UserProfileDetails profile={selectedUser} />
+                {selectedUser.role === "mentor" && sessionStorage.getItem("role") === "mentee" && (
+                  <>
+                    <TextField 
+                      label="Message (Optional)" 
+                      fullWidth 
+                      value={message} 
+                      onChange={(e) => setMessage(e.target.value)} 
+                      sx={{ my: 2 }}
+                    />
+                    <Button 
+                      variant="contained" 
+                      fullWidth 
+                      onClick={() => sendRequest(selectedUser._id)}
+                    >
+                      Send Connection Request
+                    </Button>
+                  </>
+                )}
+                <Button fullWidth sx={{ mt: 0 }} onClick={() => setSelectedUser(null)}>Close</Button>
             </>
           )}
         </Box>
@@ -227,7 +147,6 @@ const Main = () => {
         open={snackbarOpen}
         autoHideDuration={3000}
         size="large"
-        message={snackbarMessage}
         // sx ={{width:"100%"}}
         onClose={() => setSnackbarOpen(false)}>
         <Alert size="large" severity={alertType} variant="filled" x={{fontSize:"2.5rem", width: "100%" }}>

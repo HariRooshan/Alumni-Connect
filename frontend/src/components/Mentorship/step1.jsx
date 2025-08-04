@@ -1,27 +1,25 @@
-import React, { useState } from "react";
 import { 
-  Container, Typography, Radio, RadioGroup, FormControlLabel, 
+  Typography, Radio, RadioGroup, FormControlLabel, 
   Button, Paper, Box 
 } from "@mui/material";
 
-const RegistrationForm = ({ onNext }) => {
-  const [role, setRole] = useState("");
-
+const Step1 = ({ onNext, formData, setFormData }) => {
   const handleProceed = () => {
-    if (role) {
-      onNext({ role }); // Pass selected role to next step
+    if (formData.role) {
+      onNext({ role: formData.role });
     }
   };
 
   return (
-    <Container maxWidth="sm">
+    <Box sx={{ width: "60%", justifyContent: "center" , margin:"auto" }}>
       <Paper 
         elevation={3} 
         sx={{ 
-          padding: 7, 
+          padding: 5, 
           textAlign: "center", 
-          marginTop: 10,
-          width: "90%",
+          marginTop: 5,
+          marginBottom: 5,
+          width: "85%",
           border: "2px solidrgb(16, 115, 214)", // Blue border
           borderRadius: 4 // Rounded corners
         }}
@@ -34,9 +32,9 @@ const RegistrationForm = ({ onNext }) => {
         </Typography>
 
         <RadioGroup 
-          value={role} 
+          value={formData.role || ""} 
           onChange={(e) => {
-            setRole(e.target.value);
+            setFormData({ ...formData, role: e.target.value });
             sessionStorage.setItem("role", e.target.value); // Store role in session storage
           }} 
           row 
@@ -50,13 +48,13 @@ const RegistrationForm = ({ onNext }) => {
           <Button variant="outlined" disabled>
             Back
           </Button>
-          <Button variant="contained" color="primary" onClick={handleProceed} disabled={!role}>
+          <Button variant="contained" color="primary" onClick={handleProceed} disabled={!formData.role}>
             Proceed
           </Button>
         </Box>
       </Paper>
-    </Container>
+    </Box>
   );
 };
 
-export default RegistrationForm;
+export default Step1;

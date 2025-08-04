@@ -11,7 +11,7 @@ import {
   Box,
 } from "@mui/material";
 
-const Step4 = ({ formData, setFormData, onBack, onNext }) => {
+const Step4 = ({ formData, setFormData, onBack, onNext, saving = false, isEdit = false }) => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -125,15 +125,6 @@ const Step4 = ({ formData, setFormData, onBack, onNext }) => {
           </Select>
         </FormControl>
 
-        {/* <TextField
-          fullWidth
-          label={formData.role['role'] === "mentor" ? "Industry" : "Department"}
-          name="industryOrDepartment"
-          value={formData.industryOrDepartment || ""}
-          onChange={handleChange}
-          sx={{ marginTop: 2 }}
-        /> */}
-
         {/* Preferred Meeting Method */}
         <FormControl fullWidth sx={{ marginTop: 2 }} required>
           <InputLabel>Preferred Meeting Method</InputLabel>
@@ -175,8 +166,8 @@ const Step4 = ({ formData, setFormData, onBack, onNext }) => {
           <Button variant="outlined" onClick={onBack}>
             Back
           </Button>
-          <Button variant="contained" color="primary" onClick={() => onNext(formData)}>
-            Proceed
+          <Button variant="contained" color="primary" onClick={onNext} disabled={saving}>
+            {saving ? "Saving..." : isEdit ? "Update Profile" : "Proceed"}
           </Button>
         </Box>
       </Paper>

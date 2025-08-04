@@ -1,9 +1,13 @@
-import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Grid,Button, Typography, Card, CardContent, Avatar, CardActions } from "@mui/material";
-// import { useSnackbar } from "notistack";
+import { Dialog, DialogTitle, DialogContent, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import UserProfileDetails from "./userProfileDetails";
 
 const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
+
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   useEffect(() => {
     console.log("Hello");
@@ -38,6 +42,7 @@ const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
   };
 
   return (
+    <>
     <Grid container spacing={3} sx={{mb:5}}>
       {mentees.length === 0 ? (
         <Typography>No mentees available.</Typography>
@@ -51,39 +56,40 @@ const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
                 "&:hover": { boxShadow: 6, transform: "scale(1.05)" }
               }}
             >
-
-              {/* {console.log("HI")} */}
-              {/* {console.log(mentee.email+" photo = +"+mentee.photo)} */}
               
-            <Avatar 
-              // key={mentee._id} // Forces React to re-render the component
-              src={mentee.photo} 
-              sx={{mx: "auto" , mb:2}}
-            />
+              <Avatar 
+                src={mentee.photo} 
+                sx={{mx: "auto" , mb:2}}
+              />
 
-            <CardContent sx={{ minHeight: 91.5 }}>
-              <Typography variant="h6">{mentee.firstName} {mentee.lastName}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Department: {mentee.industryOrDepartment}
-              </Typography>
-              <Typography variant="body2">Looking to learn: {mentee.skills.slice(0,3).join(", ") }</Typography>
-            </CardContent>
-            <CardActions>
-              <Button 
-                variant="contained" 
-                color="secondary"
-                onClick={() => setSelectedUser(mentee)}
-                sx={{ mx: "auto" }}
-              >
-                View Details
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-      ))
-    )}
-  </Grid>
+              <CardContent sx={{ minHeight: 91.5 }}>
+                <Typography variant="h6">{mentee.firstName} {mentee.lastName}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Department: {mentee.industryOrDepartment}
+                </Typography>
+                <Typography variant="body2">Looking to learn: {mentee.skills.slice(0,3).join(", ") + (mentee.skills.length > 3 ? ", ..." : "")}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button 
+                  variant="contained" 
+                  color="secondary"
+                  onClick={() => {
+                    setSelectedUser(mentee);
+                    setProfileDialogOpen(true);
+                  }}
+                  sx={{ mx: "auto" }}
+                >
+                  View Details
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+          ))
+        )}
+    </Grid>
+    </>
   )
+  
 };
 
 export default MenteeTab;

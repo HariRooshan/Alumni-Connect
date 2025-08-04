@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Grid,Typography,Avatar,Card,CardContent,CardActions, Button } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
 
 const MentorTab = ({mentors,user,setSelectedUser,setMentors}) => {
 
@@ -19,8 +18,8 @@ const MentorTab = ({mentors,user,setSelectedUser,setMentors}) => {
       
       // Filter out the current user
       const filteredMentors = mentorData.filter(user => user.email !== currentUserEmail);
-  
       setMentors(filteredMentors);
+
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -51,7 +50,7 @@ const MentorTab = ({mentors,user,setSelectedUser,setMentors}) => {
                   Industry: {mentor.industryOrDepartment}
                 </Typography>
                 <Typography variant="body2">
-                  Skills: {mentor.skills.slice(0, 3).join(", ") + (mentor.skills.length < 3 ? ", ..." : ", ..")}
+                  Skills: {mentor.skills.slice(0, 3).join(", ") + (mentor.skills.length > 3 ? ", ..." : "")}
                 </Typography>
               </CardContent>
               <CardActions>
