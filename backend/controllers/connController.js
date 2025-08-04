@@ -49,7 +49,7 @@ const sendConnectionRequest = async (req, res) => {
   
       const existingRequest2 = await Connection.findOne({ senderId, receiverId, status: "accepted" });
       if (existingRequest2) {
-        return res.status(400).json({ message: "Connection already exist" });
+        return res.status(400).json({ message: "Connection already exists" });
       }
   
        // Create a new connection request

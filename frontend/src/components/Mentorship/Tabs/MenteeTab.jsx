@@ -74,7 +74,7 @@ const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
                   variant="contained" 
                   color="secondary"
                   onClick={() => {
-                    setSelectedProfile(mentee);
+                    setSelectedUser(mentee);
                     setProfileDialogOpen(true);
                   }}
                   sx={{ mx: "auto" }}
@@ -87,29 +87,6 @@ const MenteeTab = ({mentees,setSelectedUser,setMentees}) => {
           ))
         )}
     </Grid>
-    <Dialog
-      open={profileDialogOpen}
-      onClose={() => setProfileDialogOpen(false)}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{ sx: { borderRadius: 4 } }}
-    >
-      <DialogTitle>
-        Mentee Profile
-        <IconButton
-          aria-label="close"
-          onClick={() => setProfileDialogOpen(false)}
-          sx={{ position: "absolute", right: 10, top: 10 }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent dividers>
-        {selectedProfile && (
-          <UserProfileDetails profile={selectedProfile} />
-        )}
-      </DialogContent>
-    </Dialog>
     </>
   )
   

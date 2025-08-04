@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { 
-  Container, Tabs, Tab, Box,  Button, Alert,
-  Typography, Snackbar, TextField, Modal
+  Container, Tabs, Tab, Box,  Button, Alert, Snackbar, TextField, Modal
 } from "@mui/material";
 
 import ProfileTab from "./Tabs/ProfileTab";
@@ -9,6 +8,7 @@ import ConnectionsTab from "./Tabs/ConnectionsTab";
 import MentorTab from "./Tabs/MentorTab";
 import MenteeTab from "./Tabs/MenteeTab";
 import Navbar from "../NavBar";
+import UserProfileDetails from "./Tabs/userProfileDetails"; 
 
 const Main = () => {
 
@@ -57,29 +57,21 @@ const Main = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ senderMail : user.email , receiverId: receiverId, msg: message }),
       });
-
-      // const emailRes = await emailReq.json();
-
-      const emailRes = await emailReq.json();
-      console.log(emailRes);
-
-
-    }
-
-    else{
+    } else{
       setAlertType("error");
     }
-
-      setSnackbarMessage(data.message);
-      setSnackbarOpen(true);
-      setSelectedUser(null); // Close modal after sending request
+    setSnackbarMessage(data.message);
+    setSnackbarOpen(true);
+    setSelectedUser(null); // Close modal after sending request
+    setMessage(""); // Clear message input
     } catch (error) {
-      console.error("Error sending request:", error);
+      setSnackbarMessage("Error sending request.");
+      setAlertType("error");
+      setSnackbarOpen(true);
     }
   };
 
   return (
-
     <>
     <Navbar/>
     <Container maxWidth="lg" sx={{mt:8}}>
@@ -122,40 +114,28 @@ const Main = () => {
             bgcolor: "white", p: 4, boxShadow: 24, borderRadius: 3, width: 400
           }}
         >
-          {selectedUser && selectedUser.role === "mentor" && (
+          {selectedUser &&  (
             <>
-              <Typography variant="h6">{selectedUser.firstName} {selectedUser.lastName}</Typography>
-              <Typography>Industry: {selectedUser.industryOrDepartment}</Typography>
-              <Typography>Experience: {selectedUser.experienceOrYear}</Typography>
-              <Typography>Meeting Method: {selectedUser.meetingMethod}</Typography>
-              <Typography>Education: {selectedUser.education}</Typography>
-              {sessionStorage.getItem("role")==="mentee" && (
-                <>
-                <TextField 
-                  label="Message (Optional)" 
-                  fullWidth 
-                  value={message} 
-                  onChange={(e) => setMessage(e.target.value)} 
-                  sx={{ my: 2 }}
-                />
-                <Button variant="contained" fullWidth onClick={() => sendRequest(selectedUser._id)}>
-                  Send Connection Request
-                </Button>
-                </>
-              )}
-              <Button fullWidth sx={{ mt: 1 }} onClick={() => setSelectedUser(null)}>Close</Button>
-            </>
-          )}
-
-          {selectedUser && selectedUser.role === "mentee" && (
-            <>
-              <Typography variant="h6">{selectedUser.firstName} {selectedUser.lastName}</Typography>
-              <Typography>Department: {selectedUser.industryOrDepartment}</Typography>
-              <Typography>Year: {selectedUser.experienceOrYear}</Typography>
-              <Typography>Meeting Method: {selectedUser.meetingMethod}</Typography>
-              <Typography>Education: {selectedUser.education}</Typography>
-
-              <Button fullWidth sx={{ mt: 1 }} onClick={() => setSelectedUser(null)}>Close</Button>
+              <UserProfileDetails profile={selectedUser} />
+                {selectedUser.role === "mentor" && sessionStorage.getItem("role") === "mentee" && (
+                  <>
+                    <TextField 
+                      label="Message (Optional)" 
+                      fullWidth 
+                      value={message} 
+                      onChange={(e) => setMessage(e.target.value)} 
+                      sx={{ my: 2 }}
+                    />
+                    <Button 
+                      variant="contained" 
+                      fullWidth 
+                      onClick={() => sendRequest(selectedUser._id)}
+                    >
+                      Send Connection Request
+                    </Button>
+                  </>
+                )}
+                <Button fullWidth sx={{ mt: 0 }} onClick={() => setSelectedUser(null)}>Close</Button>
             </>
           )}
         </Box>
@@ -167,7 +147,6 @@ const Main = () => {
         open={snackbarOpen}
         autoHideDuration={3000}
         size="large"
-        message={snackbarMessage}
         // sx ={{width:"100%"}}
         onClose={() => setSnackbarOpen(false)}>
         <Alert size="large" severity={alertType} variant="filled" x={{fontSize:"2.5rem", width: "100%" }}>

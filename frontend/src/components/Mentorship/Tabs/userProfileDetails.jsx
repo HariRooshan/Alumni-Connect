@@ -36,7 +36,7 @@ const UserProfileDetails = ({ profile, showEdit, onEdit }) => {
         <Typography><b>Meeting Method:</b> {profile.meetingMethod || <span style={{ color: "#888" }}>Not set</span>}</Typography>
         <Typography><b>Education:</b> {profile.education || <span style={{ color: "#888" }}>Not set</span>}</Typography>
         <Typography><b>Skills:</b></Typography>
-        <Box sx={{ mb: 1 }}>
+        <Box sx={{ mb: 0 }}>
           {profile.skills && profile.skills.length > 0
             ? profile.skills.map((skill) => (
               <Chip key={skill} label={skill} sx={{ mr: 1, mb: 1 }} />
