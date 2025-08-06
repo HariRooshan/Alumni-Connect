@@ -54,7 +54,7 @@ const Navbar = () => {
 
           {/* Title */}
           <Typography variant="h6" sx={{ flexGrow: 1, textAlign: { xs: "center", md: "left" } }}>
-            PSG Tech Alumni Association
+            PSG Tech IT Department Alumni Portal
           </Typography>
 
           {/* Desktop Menu */}

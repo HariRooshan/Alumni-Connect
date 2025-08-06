@@ -1,43 +1,29 @@
-import { useEffect, useState } from "react";
 import { Box, Typography, Link, Container, Grid } from "@mui/material";
-import axios from "axios";
+
 
 const Footer = () => {
-  const [contact, setContact] = useState({ email: "", phone: "" });
-
-  useEffect(() => {
-    axios.get("http://localhost:5000/api/admin/getcontact")
-      .then(response => setContact(response.data))
-      .catch(error => console.error("Error fetching contact info:", error));
-  }, []);
-
   return (
-    <Box 
-      component="footer" 
-      sx={{ 
-        color: "white", 
-        py: 1.5, 
-        background: "linear-gradient(to right, #4a00e0, #8e2de2)" 
+    <Box
+      component="footer"
+      sx={{
+        color: "white",
+        py: 2,
+        background: "linear-gradient(to right, #4a00e0, #8e2de2)",
       }}
     >
       <Container maxWidth="lg">
         <Grid container spacing={2} justifyContent="space-between" alignItems="center">
-          <Grid item xs={12} md="auto">
-            <Typography variant="body1" fontWeight="bold">Contact</Typography>
-            <Typography variant="body2">
-              <Link href={`mailto:${contact.email}`} color="inherit" underline="hover">
-                {contact.email || "Loading..."}
-              </Link>
+          {/* PSG Tech logo and label */}
+          <Grid item xs={12} md="auto" display="flex" alignItems="center">
+            <img src="/PSG logo.jpeg" alt="PSG Logo" style={{ width: 60, height: 60, marginRight: 10 }} />
+            <Typography variant="body1" fontWeight="bold">
+              PSG Tech Alumni Association
             </Typography>
-            <Typography variant="body2">{contact.phone || "Loading..."}</Typography>
           </Grid>
-          <Grid>
-          <Typography variant="body1" fontWeight="bold">
-              <Link href="/developers-info" color="inherit" underline="hover">
-                Developers Info
-              </Link>
-            </Typography>
-        </Grid>
+
+          
+
+          {/* Privacy Policy and Terms */}
           <Grid item xs={12} md="auto">
             <Typography variant="body1" fontWeight="bold">
               <Link href="/privacy-policy" color="inherit" underline="hover">

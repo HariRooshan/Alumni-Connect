@@ -43,7 +43,7 @@ import Step4 from "./components/Mentorship/step4.jsx";
 import Main from "./components/Mentorship/Main.jsx";
 import AdminPage from "./components/AdminPage";
 import MentorshipChat from "./components/Mentorship/Chat.jsx";
-import DeveloperInfo from "./DevelopersInfo.js";
+import DeveloperInfo from "./components/DevelopersInfo.js";
 
 function App() {
   return (
