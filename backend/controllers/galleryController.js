@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import GalleryPhoto from '../models/GalleryPhoto.js';
+import transporter from "../config/transporter.js";
 
 // ensure folders
 export const ensureDirectoriesExist = () => {
@@ -47,7 +48,8 @@ export const uploadSingle = async (req, res) => {
   await new GalleryPhoto({
     filename: req.file.filename,
     caption:  req.body.caption||"",
-    album:    null
+    album:    null,
+    validated: req.body.validated === "true"
   }).save();
 
   res.json({
@@ -65,12 +67,17 @@ export const uploadAlbum = async (req, res) => {
   const album = req.body.album?.trim();
   if (!album) return res.status(400).json({ message:'Album required.' });
   if (!req.files?.length) return res.status(400).json({ message:'No files.' });
+    const exists = await GalleryPhoto.exists({ album });
+  if (exists) {
+    return res.status(409).json({ message: 'Album already exists' });
+  }
 
   // record each
   const docs = req.files.map(f=>({
     filename: f.filename,
     album,
-    caption: ""
+    caption: "",
+    validated: req.body.validated === "true"
   }));
   await GalleryPhoto.insertMany(docs);
 
@@ -194,4 +201,32 @@ export const deleteAlbum = async (req, res) => {
     message: `Deleted album "${albumName}" (${result.deletedCount} photos)`,
     deletedCount: result.deletedCount
   });
+};
+export const sendUploadNotification = async (req, res) => {
+  const { name, email, count, album } = req.body;
+  if (!name || !email || !count) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  const subject = `New upload by ${name}`;
+  let text = `${name} (${email}) has just uploaded ${count} image${count>1?"s":""}.`;
+  if (album) text += ` Album: "${album}".`;
+  text += "\n\nPlease review them at your earliest convenience.";
+
+  try {
+    await new Promise((resolve, reject) => {
+      transporter.sendMail({
+        from: process.env.BALAMURUGAN_EMAIL,
+        to: process.env.KATHIR_EMAIL,
+        subject,
+        text,
+      }, (err, info) =>
+        err ? reject(err) : resolve(info)
+      );
+    });
+    res.status(200).json({ message: "Notification sent" });
+  } catch (err) {
+    console.error("Mailer error:", err);
+    res.status(500).json({ message: "Could not send notification" });
+  }
 };
