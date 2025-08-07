@@ -32,7 +32,7 @@ const Footer = () => {
             </Box>
           </Grid>
 
-          {/* Privacy Policy and Terms */}
+          {/* Privacy Policy and Terms
           <Grid item xs={12} md="auto">
             <Typography variant="body1" fontWeight="bold">
               <Link href="/privacy-policy" color="inherit" underline="hover">
@@ -44,7 +44,18 @@ const Footer = () => {
                 Terms of Use
               </Link>
             </Typography>
-          </Grid>
+          </Grid> */}
+          {/* Developer Info link aligned right */}
+          <Grid item xs={12} md="auto">
+        
+          <Typography variant="body1" fontWeight="bold">
+            <Link href="/developers-info" underline="hover" color="white">
+              Developer Info
+            </Link>
+          </Typography>
+        
+        </Grid>
+        
         </Grid>
       </Container>
     </Box>

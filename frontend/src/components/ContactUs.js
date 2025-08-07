@@ -63,7 +63,7 @@ const ContactUs = () => {
       {/* Contact Info */}
       <Box>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
-          CONTACT ALUMNI OFFICE
+          CONTACT IT ALUMNI ASSOCIATION
         </Typography>
 
         <Typography variant="body1" mt={1}>
@@ -82,9 +82,7 @@ const ContactUs = () => {
           </Typography>
         )}
 
-        <Typography variant="body1" mt={1}>
-          <strong>Phone:</strong> {contact.phone || "Not Available"}
-        </Typography>
+        
       </Box>
     </Paper>
 

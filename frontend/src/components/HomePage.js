@@ -99,7 +99,7 @@ const HomePage = () => {
         ></div>
         <div style={{ zIndex: 1 }}>
           <Typography variant="h3" fontWeight="bold">
-            Welcome to PSG Tech Alumni Association
+            Welcome to PSG Tech - IT Alumni Association
           </Typography>
           <Typography variant="h6" mt={2}>
             Stay connected, give back, and grow together!
@@ -113,7 +113,7 @@ const HomePage = () => {
           About Us
         </Typography>
         <Typography variant="body1" maxWidth="md" mx="auto" mt={2}>
-          The PSG Tech Alumni Association fosters lifelong connections between alumni, faculty, and students. Join us to participate in events, mentorship programs, and career support initiatives.
+          The PSG Tech - IT Alumni Association fosters lifelong connections between alumni, faculty, and students. Join us to participate in events, mentorship programs, and career support initiatives.
         </Typography>
       </Container>
 
