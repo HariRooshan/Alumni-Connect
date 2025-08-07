@@ -124,7 +124,7 @@ const EventList = () => {
         </Grid>
       </Box>
 
-     {/* Event Cards */}
+      {/* Event Cards */}
       {filteredEvents.length === 0 ? (
         <Typography variant="h6" align="center" color="text.secondary" sx={{ mt: 8 }}>
           📭 No events found.
@@ -155,7 +155,27 @@ const EventList = () => {
                   <Button
                     variant="contained"
                     fullWidth
-                    sx={{ mt: 2, borderRadius: 2 }}
+                    sx={{
+                      background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+                      marginTop: 1.5,
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      borderRadius: 3,
+                      boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+                      letterSpacing: 1,
+                      px: 2,
+                      py: 1,
+                      fontSize: 14,
+                      minWidth: 110,
+                      transition: 'all 0.2s',
+                      textTransform: 'uppercase',
+                      '&:hover': {
+                        background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+                        boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+                        transform: 'scale(1.05)',
+                      },
+                      flex: 1,
+                    }}
                     onClick={() => handleOpenPopup(event)}
                   >
                     View Details
@@ -174,7 +194,7 @@ const EventList = () => {
             <DialogTitle sx={{ fontWeight: "bold", color: "primary.main", textAlign: "center" }}>
               {selectedEvent.title}
             </DialogTitle>
-             <DialogContent sx={{ textAlign: "center", pb: 3 }}>
+            <DialogContent sx={{ textAlign: "center", pb: 3 }}>
               {selectedEvent.attachment && (() => {
                 const url = `http://localhost:5000${selectedEvent.attachment}`;
                 const isPDF = /\.pdf$/i.test(url);

@@ -15,11 +15,15 @@ function Gallery() {
 
   let userRole = "Students";
   const token = localStorage.getItem("token");
+  let userName = "Unknown";
+let userEmail = "";
 
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
       userRole = decodedToken.role || "";
+      userName = decodedToken.name || "";
+      userEmail = decodedToken.email || "";
 
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -39,8 +43,8 @@ function Gallery() {
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [loadingAlbums, setLoadingAlbums] = useState(true);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
-  // State for "All Photos" popup viewer
   const [allPhotosPopupOpen, setAllPhotosPopupOpen] = useState(false);
   const [allPhotosSliderIndex, setAllPhotosSliderIndex] = useState(0);
   const backendURL = "http://localhost:5000";
@@ -70,6 +74,20 @@ function Gallery() {
     }
     setLoadingAlbums(false);
   };
+  const validatedCountByAlbum = allPhotos.reduce((acc, p) => {
+    if (p.album) {
+      acc[p.album] = (acc[p.album] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  // pick the first validated photo in each album as its cover
+  const coverByAlbum = allPhotos.reduce((acc, p) => {
+    if (p.album && !acc[p.album]) {
+      acc[p.album] = p.src;
+    }
+    return acc;
+  }, {});
 
   const handleFileSelection = (event) => {
     const files = Array.from(event.target.files);
@@ -107,7 +125,15 @@ function Gallery() {
 
   const handleUpload = async () => {
     if (selectedImages.length === 0) return;
+    setUploadError("");
+    if (selectedImages.length > 3) {
+      setUploadError("You can only upload up to 3 images per album at once.");
+      return;
+    }
     const formData = new FormData();
+    if (userRole === "Admin") {
+      formData.append("validated", "true");
+    }
 
     try {
       if (selectedImages.length === 1) {
@@ -136,16 +162,40 @@ function Gallery() {
       fetchAlbums();
       setUploadSuccess(true);
     } catch (err) {
-      alert("Upload failed. Please try again.");
+      if (err.response?.status === 409) {
+        alert("That album name is already in use. Please choose another.");
+      } else {
+        alert("Upload failed. Please try again.");
+      }
       console.error("Upload error:", err);
     }
+      try {
+    // after both fetchAllPhotos() and fetchAlbums():
+    setUploadSuccess(true);
+
+   // notify via email
+   await axios.post( `${API_URL}/upload-notification`, {
+     name:     userName,
+     email:    userEmail,
+     count:    selectedImages.length,
+     album:    selectedImages.length > 1 ? albumName : undefined
+   });
+  } catch (notifyError) {
+    console.error("Notification error:", notifyError);
+  }
   };
 
   const openAlbum = async (albumName) => {
-    const res = await axios.get(`${API_URL}/album/${albumName}`);
-    setAlbumPhotos(res.data.photos);
-    setSelectedAlbum(albumName);
-    setSliderIndex(0);
+    try {
+      const res = await axios.get(`${API_URL}/album/${albumName}`);
+      const onlyValidated = res.data.photos.filter((p) => p.validated);
+      setAlbumPhotos(onlyValidated);
+      setSelectedAlbum(albumName);
+      setSliderIndex(0);
+    }
+    catch (err) {
+      console.error("Error fetching album photos", err);
+    }
   };
 
   // Album photo viewer navigation functions
@@ -163,11 +213,31 @@ function Gallery() {
   return (
     <Box sx={{ textAlign: "center", p: 2 }}>
       {/* Show Upload Button only if userRole is "Alumni" */}
-      {(userRole === "Alumni" || userRole === "Admin") && (
+      {(userRole === "Alumni" || userRole === "Admin" || userRole === "Staff") && (
         <Button
           variant="contained"
           startIcon={<PhotoCamera />}
           onClick={() => setUploadDialogOpen(true)}
+          sx={{
+            background: 'linear-gradient(90deg, #1e90ff 0%, #6a0dad 100%)',
+            color: '#fff',
+            fontWeight: 'bold',
+            borderRadius: 3,
+            boxShadow: '0 2px 8px 0 rgba(30,144,255,0.10)',
+            letterSpacing: 1,
+            px: 2,
+            py: 1,
+            fontSize: 14,
+            minWidth: 110,
+            transition: 'all 0.2s',
+            textTransform: 'uppercase',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #6a0dad 0%, #1e90ff 100%)',
+              boxShadow: '0 4px 12px 0 rgba(106,13,173,0.15)',
+              transform: 'scale(1.05)',
+            },
+            flex: 1,
+          }}
         >
           Upload Photos
         </Button>
@@ -256,29 +326,31 @@ function Gallery() {
       {tabIndex === 1 &&
         (loadingAlbums ? (
           <CircularProgress />
-        ) : albums.length === 0 ? (
+        ) : Object.keys(validatedCountByAlbum).length === 0 ? (
           <Typography color="text.secondary" sx={{ my: 4 }}>
             No albums available.
           </Typography>
         ) : (
           <Grid container spacing={2} justifyContent="center">
-            {albums.map((album) => (
-              <Grid item key={album.albumName} xs={12} sm={4}>
-                <Card sx={{ cursor: "pointer" }} onClick={() => openAlbum(album.albumName)}>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={`${backendURL}${album.coverImage}`}
-                    alt={album.albumName}
-                    loading="lazy"
-                  />
-                  <CardContent>
-                    <Typography variant="h6">{album.albumName}</Typography>
-                    <Typography variant="body2">{album.totalPhotos} photos</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {albums
+              .filter((alb) => validatedCountByAlbum[alb.albumName] > 0)
+              .map((alb) => (
+                <Grid item key={alb.albumName} xs={12} sm={4}>
+                  <Card sx={{ cursor: "pointer" }} onClick={() => openAlbum(alb.albumName)}>
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={`${backendURL}${coverByAlbum[alb.albumName]}`}
+                      alt={alb.albumName}
+                      loading="lazy"
+                    />
+                    <CardContent>
+                      <Typography variant="h6">{alb.albumName}</Typography>
+                      <Typography variant="body2">  {validatedCountByAlbum[alb.albumName]} photos</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
           </Grid>
         ))}
 
@@ -294,6 +366,12 @@ function Gallery() {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Upload Photos
           </Typography>
+
+          {uploadError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {uploadError}
+            </Alert>
+          )}
 
           {selectedImages.length === 1 && (
             <TextField
