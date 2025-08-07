@@ -10,13 +10,15 @@ const {
   validateBulk,
   deleteUnvalidated,
   deleteAlbum,
-  upload
+  upload,
+  sendUploadNotification
 } = require('../controllers/galleryController');
 
 const router = express.Router();
 
 router.post('/uploadSingle', upload.single('photo'),    uploadSingle);
 router.post('/uploadAlbum',  upload.array('photos',10), uploadAlbum);
+router.post("/upload-notification", sendUploadNotification);
 
 router.get('/photos',    getAllPhotos);
 router.get('/albums',    getAlbums);
