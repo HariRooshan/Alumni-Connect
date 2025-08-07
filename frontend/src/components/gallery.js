@@ -570,7 +570,10 @@ let userEmail = "";
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert onClose={() => setUploadSuccess(false)} severity="success" sx={{ width: '100%' }}>
-          Thanks for uploading! Your upload will be reviewed by the admin soon.
+          {userRole === "Admin"
+            ? "Your upload is now live in the gallery!"
+            : "Thanks for uploading! Your upload will be reviewed by the admin soon."
+          }
         </Alert>
       </Snackbar>
     </Box>
