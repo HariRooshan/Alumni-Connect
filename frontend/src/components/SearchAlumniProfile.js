@@ -138,7 +138,7 @@ import WorkIcon from '@mui/icons-material/Work';
     
       console.log("Search count:", updatedSearchCount);
     
-      if (updatedSearchCount >= 5) {
+      if (updatedSearchCount >= 10) {
         sendEmail(profile);
         setSearchCount(0);
         localStorage.setItem("searchCount", 0); // Reset after reaching threshold
@@ -443,10 +443,7 @@ const downloadPDF = () => {
     alert("❌ Invalid session. Please log in again.");
     return;
   }
-  if (userRole !== "Alumni") {
-    alert("❌ Only alumni can download the PDF.");
-    return;
-  }
+  
   // Only include selected columns
   const selectedCols = allColumns.filter(col => selectedPdfColumns.includes(col.key));
   if (selectedCols.length === 0) {
@@ -459,17 +456,21 @@ const downloadPDF = () => {
   doc.setFont("helvetica", "normal");
   const tableColumn = selectedCols.map(col => col.label);
   const tableRows = filteredData.map((alumni) =>
-    selectedCols.map(col => {
-      if (col.key === 'linkedinUrl') {
-        const val = alumni[col.key] || "N/A";
-        if (val.length > 35) {
-          return val.slice(0, 32) + '...';
-        }
-        return val;
-      }
-      return alumni[col.key] || "N/A";
-    })
-  );
+  selectedCols.map((col) => {
+    const value = alumni[col.key];
+
+    if (col.key === 'linkedinUrl') {
+      if (!value || typeof value !== 'string') return "N/A";
+
+      // Insert newline every 40 characters to simulate wrap
+      return value.replace(/(.{40})/g, "$1\n");
+    }
+
+    return value || "N/A";
+  })
+);
+
+
   // Compact, clean, and centered style
   autoTable(doc, {
     head: [tableColumn],
@@ -838,17 +839,26 @@ return (
             filteredData.map((alumni, index) => (
               <TableRow key={index}>
                 {allColumns.map((col, idx) => (
-                  <TableCell
-                    key={idx}
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      ...(col.key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
-                    }}
-                  >
-                    {alumni[col.key] || "N/A"}
-                  </TableCell>
+                 <TableCell
+  key={idx}
+  sx={{
+    ...(col.key === 'linkedinUrl'
+      ? {
+          whiteSpace: 'normal',       // allow text to wrap
+          wordBreak: 'break-word',    // break long words/URLs
+          maxWidth: 200,
+          minWidth: 120,
+        }
+      : {
+          whiteSpace: 'nowrap',       // for all other columns
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }),
+  }}
+>
+  {alumni[col.key] || "N/A"}
+</TableCell>
+
                 ))}
               </TableRow>
             ))
@@ -888,7 +898,7 @@ return (
       </DialogActions>
     </Dialog>
 
-    {userRole !== "Student" && (
+    {userRole !== "Student"&&userRole !== "Alumni" && (
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
         <Button
           variant="contained"
