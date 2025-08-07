@@ -54,7 +54,7 @@ function AppWithNavBar() {
     }
   }, [location.pathname]); // Runs on route change
 
-  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery"];
+  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery","/developers-info"];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>

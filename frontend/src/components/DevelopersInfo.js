@@ -74,6 +74,21 @@ const DeveloperInfo = () => {
       </Typography>
 
       <Grid container spacing={6}>
+        {/* Full-screen Background Image */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundImage: "url('Alumni_Image.jpg')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  zIndex: -1, // Ensures the background stays behind content
+                }}
+              />
         {developers.map((dev, index) => (
           <Grid item key={index} xs={12} sm={6} md={4}>
             <Card
