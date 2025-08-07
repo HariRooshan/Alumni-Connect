@@ -27,8 +27,6 @@ import EventDetails from "./components/EventDetails";
 import AdminContact from "./components/AdminContact";
 import AdminHome from "./components/AdminHome";
 import AdminGallery from "./components/Admingallery";
-import MentorshipHome from "./components/Mentorship/Home";
-import MentorshipGuidelines from "./components/Mentorship/Guidelines";
 import MentorshipDashboard from "./components/Mentorship/Dashboard";
 import RegistrationForm from "./components/Mentorship/RegistrationForm.jsx";
 import Main from "./components/Mentorship/Main.jsx";
@@ -86,9 +84,7 @@ function AppWithNavBar() {
           <Route path="/admin-home" element={<AdminHome />} />
           <Route path="/admin-gallery" element={<AdminGallery />} />
           <Route path="/admin-event" element={<AdminPage />} />
-          <Route path="/mentorship" element={<MentorshipHome />} />
-          <Route path="/mentorship/guidelines" element={<MentorshipGuidelines />} />
-          <Route path="/mentorship/dashboard" element={<MentorshipDashboard />} />
+          <Route path="/mentorship" element={<MentorshipDashboard />} />
           <Route path="/mentorship/register" element={<RegistrationForm />} />
           <Route path="/mentorship/main" element={<Main />} />
           <Route path="/mentorship/chat/:senderId/:receiverId" element={<MentorshipChat />} />

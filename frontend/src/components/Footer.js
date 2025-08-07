@@ -21,21 +21,6 @@ const Footer = () => {
             </Typography>
           </Grid>
 
-          
-
-          {/* Privacy Policy and Terms
-          <Grid item xs={12} md="auto">
-            <Typography variant="body1" fontWeight="bold">
-              <Link href="/privacy-policy" color="inherit" underline="hover">
-                Privacy Policy
-              </Link>
-            </Typography>
-            <Typography variant="body2">
-              <Link href="/terms-of-use" color="inherit" underline="hover">
-                Terms of Use
-              </Link>
-            </Typography>
-          </Grid> */}
           {/* Developer Info link aligned right */}
           <Grid item xs={12} md="auto">
         

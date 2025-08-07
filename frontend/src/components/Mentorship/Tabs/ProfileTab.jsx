@@ -11,7 +11,7 @@ import Step3 from "../step3";
 import Step4 from "../step4";
 import UserProfileDetails from "./userProfileDetails";
 
-const steps = ["Basic Info", "Education", "Skills", "Summary"];
+const steps = ["Role", "Basic Info", "Skills", "Additional Info"];
 
 const ProfileTab = () => {
   const [profile, setProfile] = useState(null);

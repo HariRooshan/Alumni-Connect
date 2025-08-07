@@ -1,8 +1,6 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Button,
   Container,
@@ -11,14 +9,11 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Avatar,
-  Menu,
-  MenuItem,
-  IconButton,
+  Snackbar,
+  Alert
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../NavBar";
 
 function MentorshipDashboard() {
@@ -26,23 +21,43 @@ function MentorshipDashboard() {
   const [mentorCount, setMentorCount] = useState(0);
   const [menteeCount, setMenteeCount] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [user, setUser] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [hoveredService, setHoveredService] = useState(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  // ✅ Retrieve user data from session storage
-  // useEffect(() => {
-  //   const storedUser = sessionStorage.getItem("user");
-  //   if (storedUser) {
-  //     setUser(JSON.parse(storedUser));
-  //   } else {
-  //     navigate("/mentorship/login"); // Redirect to login if no session exists
-  //   }
-  // }, [navigate]);
+  const [alert, setAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success"); // Decode safely
+  const [isRegistered, setIsRegistered] = useState(null); // null = unknown, true/false = checked
 
   useEffect(() => {
     fetchMemberCount ()
+  }, []);
+  
+
+  useEffect(() => {
+    const checkRegistration = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsRegistered(false);
+        return;
+      }
+      try {
+        const decodedToken = jwtDecode(token);
+        const EMAIL_ID = decodedToken.email;
+        if (!EMAIL_ID) {
+          setIsRegistered(false);
+          return;
+        }
+        const response = await fetch("http://localhost:5000/api/auth/check-user2", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: EMAIL_ID }),
+        });
+        setIsRegistered(response.status < 400);
+      } catch (error) {
+        setIsRegistered(false);
+      }
+    };
+    checkRegistration();
   }, []);
 
   const fetchMemberCount = async () => {
@@ -52,7 +67,6 @@ function MentorshipDashboard() {
         console.log("Error 404 : No data found");
       }
       const result = await response.json();
-      // console.log("Result:", result);
       setMentorCount(result.mentorCount);
       setMenteeCount(result.menteeCount);
       setTotalUsers(result.totalUsers);
@@ -61,19 +75,70 @@ function MentorshipDashboard() {
     }
   }
 
-  // ✅ Handle Profile Menu Open/Close
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const check_user = async () => {
+    const token = localStorage.getItem("token");
+    if(!token){
+      console.log("g=ehldhjcn");
+    }
+    const decodedToken = jwtDecode(token);
+    let EMAIL_ID = decodedToken.email; // Extract email
+    try {
+      if (!EMAIL_ID) {
+        console.error("EMAIL_ID is undefined.");
+        return;
+      }
+      const response = await fetch("http://localhost:5000/api/auth/check-user2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: EMAIL_ID }),
+      });
+      if (response.status < 400) {
 
-  // ✅ Logout Function
-  const handleLogout = () => {
-    sessionStorage.removeItem("user");
-    navigate("/mentorship/login");
-  };
+        const data = await response.json();
+
+        const user = data.user;
+        const fullName = user.firstName + " " + user.lastName;
+        const isAdminOrMentor = user.role !== "user";
+
+        const userSession = {
+          name: isAdminOrMentor ? fullName : user.name,
+          email: user.email,
+          picture: isAdminOrMentor ? user.photo : user.picture,
+          role: user.role || "user",
+          id: user._id,
+        };
+
+        // ✅ Store session
+        sessionStorage.setItem("user", JSON.stringify(userSession));
+        sessionStorage.setItem("email", user.email);
+        sessionStorage.setItem("name", userSession.name);
+        sessionStorage.setItem("picture", userSession.picture);
+        sessionStorage.setItem("role", user.role || "user");
+        sessionStorage.setItem("id", user._id);
+
+        // ✅ Set alerts
+        setAlert(true);
+        setAlertType("success");
+        setAlertMessage(`Login successful: Welcome ${userSession.name}`);
+
+        setTimeout(() => {
+          navigate("/mentorship/main");
+        }, 1500);
+      } else {
+        // ❌ User not found in DB
+        setTimeout(() => {
+          navigate("/mentorship/register");
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Error checking user:", error);
+      setAlert(true);
+      setAlertType("error");
+      setAlertMessage("Something went wrong. Please try again.");
+    }
+  }
 
   const services = [
     { name: "Networking", image: "../../networking.jpg", description: "Build connections with professionals and peers." },
@@ -107,37 +172,6 @@ function MentorshipDashboard() {
   return (
     <>
       <Navbar/>
-      {/* ✅ Navigation Bar with Account Dropdown */}
-      <AppBar position="static" style={{ background: "linear-gradient(to right, #4a00e0, #8e2de2)" }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-            Mentorship Dashboard
-          </Typography>
-
-          {/* ✅ User Account Dropdown */}
-          {user && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Typography variant="body1">{sessionStorage.getItem("name")}</Typography>
-              <IconButton onClick={handleMenuOpen} size="small">
-                <Avatar src={sessionStorage.getItem("picture")} alt={sessionStorage.getItem("name")} />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                sx={{ mt: 1 }}
-              >
-                <MenuItem onClick={() => navigate("/profile")}>
-                  <AccountCircleIcon sx={{ mr: 1 }} /> View Profile
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} /> Logout
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-        </Toolbar>
-      </AppBar>
 
       {/* Main Content */}
       <Container maxWidth="lg" style={{ marginTop: "40px" }}>
@@ -157,11 +191,14 @@ function MentorshipDashboard() {
             variant="contained"
             color="primary"
             size="large"
-            component={Link}
-            to="/mentorship/register"
+            onClick={check_user}
             style={{ background: "linear-gradient(90deg, #1a237e, #283593)" }}
           >
-            Join the Program
+            {isRegistered === null
+              ? "Loading..."
+              : isRegistered
+                ? "Go to Mentorship Portal"
+                : "Register for the Mentorship Program"}
           </Button>
         </Box>
 
@@ -210,6 +247,17 @@ function MentorshipDashboard() {
           </Box>
         )}
       </Container>
+      {/* 🔹 Snackbar for Notifications */}
+      <Snackbar
+        anchorOrigin={ { vertical: "top", horizontal: "right" } }
+        open={alert}
+        autoHideDuration={3000}
+        // size="large"
+        onClose={() => setAlert(false)}>
+        <Alert size="large" severity={alertType}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

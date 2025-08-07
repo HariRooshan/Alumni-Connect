@@ -399,6 +399,7 @@ function AdminGallery() {
               ))}
             </Grid>
           )}
+          {sortedUnvalidated.length > 0 && (
           <Box
             sx={{
               mt: 3,
@@ -443,6 +444,7 @@ function AdminGallery() {
               Delete All
             </Button>
           </Box>
+          )}
 
 
           {/* Divider */}
