@@ -60,8 +60,8 @@ const ContactUs = () => {
         <AlternateEmailIcon sx={{ fontSize: 60, color: "blue" }} />
       </Box>
 
-      {/* Contact Info Box */}
-     
+      {/* Contact Info */}
+      <Box>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
           CONTACT ALUMNI OFFICE
         </Typography>
@@ -85,7 +85,18 @@ const ContactUs = () => {
         <Typography variant="body1" mt={1}>
           <strong>Phone:</strong> {contact.phone || "Not Available"}
         </Typography>
-      </Paper>
+
+        {/* Developer Info link aligned right */}
+        <Box display="flex" justifyContent="flex-end" mt={4}>
+          <Typography variant="body2" fontWeight="bold">
+            <Link href="/developers-info" underline="hover" color="primary">
+              Developer Info
+            </Link>
+          </Typography>
+        </Box>
+      </Box>
+    </Paper>
+
     </Container>
   );
 };
