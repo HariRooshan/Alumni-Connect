@@ -69,16 +69,16 @@ const developers = [
 const DeveloperInfo = () => {
   return (
     <Container sx={{ py: 6, px: { xs: 2, sm: 4, md: 6 } }}>
-      <Typography variant="h4" align="center" gutterBottom>
+      <Typography variant="h4" align="center" gutterBottom sx={{mb:5, fontWeight: "bold"}}>
         Developer Team
       </Typography>
 
-      <Grid container spacing={6}>
+      <Grid container spacing={6} sx={{ mb:4 }}>
         {/* Full-screen Background Image */}
               <Box
                 sx={{
                   position: "absolute",
-                  top: 0,
+                  top: 80,
                   left: 0,
                   width: "100%",
                   height: "100%",
@@ -106,7 +106,7 @@ const DeveloperInfo = () => {
                 <PersonIcon fontSize="large" />
               </Avatar>
 
-              <CardContent sx={{ textAlign: 'center', flexGrow: 1 }}>
+              <CardContent sx={{ textAlign: 'center', flexGrow: 1, mb:0.5 }}>
                 <Typography variant="h6" fontWeight="bold">
                   {dev.name}
                 </Typography>
@@ -121,7 +121,7 @@ const DeveloperInfo = () => {
                 </Box>
               </CardContent>
 
-              <CardActions sx={{ pt: 0 }}>
+              <CardActions sx={{ pt: 0, mt: -5 }}>
                 <IconButton
                   component="a"
                   href={dev.linkedin}
