@@ -16,7 +16,7 @@ function Gallery() {
   let userRole = "Students";
   const token = localStorage.getItem("token");
   let userName = "Unknown";
-let userEmail = "";
+  let userEmail = "";
 
   if (token) {
     try {
@@ -48,6 +48,7 @@ let userEmail = "";
   const [allPhotosPopupOpen, setAllPhotosPopupOpen] = useState(false);
   const [allPhotosSliderIndex, setAllPhotosSliderIndex] = useState(0);
   const backendURL = "http://localhost:5000";
+
   useEffect(() => {
     fetchAllPhotos();
     fetchAlbums();
@@ -74,6 +75,7 @@ let userEmail = "";
     }
     setLoadingAlbums(false);
   };
+
   const validatedCountByAlbum = allPhotos.reduce((acc, p) => {
     if (p.album) {
       acc[p.album] = (acc[p.album] || 0) + 1;
@@ -169,20 +171,23 @@ let userEmail = "";
       }
       console.error("Upload error:", err);
     }
-      try {
-    // after both fetchAllPhotos() and fetchAlbums():
-    setUploadSuccess(true);
 
-   // notify via email
-   await axios.post( `${API_URL}/upload-notification`, {
-     name:     userName,
-     email:    userEmail,
-     count:    selectedImages.length,
-     album:    selectedImages.length > 1 ? albumName : undefined
-   });
-  } catch (notifyError) {
-    console.error("Notification error:", notifyError);
-  }
+    try {
+      // after both fetchAllPhotos() and fetchAlbums():
+      setUploadSuccess(true);
+
+      // notify via email
+      if(userRole !== "Admin") {
+        await axios.post(`${API_URL}/upload-notification`, {
+          name: userName,
+          email: userEmail,
+          count: selectedImages.length,
+          album: selectedImages.length > 1 ? albumName : undefined
+        });
+      }
+    } catch (notifyError) {
+      console.error("Notification error:", notifyError);
+    }
   };
 
   const openAlbum = async (albumName) => {
@@ -201,12 +206,14 @@ let userEmail = "";
   // Album photo viewer navigation functions
   const nextAlbumPhoto = () =>
     setSliderIndex((prev) => (prev + 1) % albumPhotos.length);
+
   const prevAlbumPhoto = () =>
     setSliderIndex((prev) => (prev - 1 + albumPhotos.length) % albumPhotos.length);
 
   // All photos viewer navigation functions
   const nextAllPhoto = () =>
     setAllPhotosSliderIndex((prev) => (prev + 1) % allPhotos.length);
+  
   const prevAllPhoto = () =>
     setAllPhotosSliderIndex((prev) => (prev - 1 + allPhotos.length) % allPhotos.length);
 
