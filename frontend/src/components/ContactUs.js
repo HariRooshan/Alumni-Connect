@@ -85,15 +85,6 @@ const ContactUs = () => {
         <Typography variant="body1" mt={1}>
           <strong>Phone:</strong> {contact.phone || "Not Available"}
         </Typography>
-
-        {/* Developer Info link aligned right */}
-        <Box display="flex" justifyContent="flex-end" mt={4}>
-          <Typography variant="body2" fontWeight="bold">
-            <Link href="/developers-info" underline="hover" color="primary">
-              Developer Info
-            </Link>
-          </Typography>
-        </Box>
       </Box>
     </Paper>
 

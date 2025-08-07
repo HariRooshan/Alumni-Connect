@@ -147,9 +147,8 @@ const Main = () => {
         open={snackbarOpen}
         autoHideDuration={3000}
         size="large"
-        // sx ={{width:"100%"}}
         onClose={() => setSnackbarOpen(false)}>
-        <Alert size="large" severity={alertType} variant="filled" x={{fontSize:"2.5rem", width: "100%" }}>
+        <Alert size="large" severity={alertType}>
             {snackbarMessage}
         </Alert>
       </Snackbar>

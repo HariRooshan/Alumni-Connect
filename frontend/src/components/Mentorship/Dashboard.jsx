@@ -254,7 +254,7 @@ function MentorshipDashboard() {
         autoHideDuration={3000}
         // size="large"
         onClose={() => setAlert(false)}>
-        <Alert size="large" severity={alertType} variant="filled" sx={{fontSize:"1.1rem", width: "100%" }}>
+        <Alert size="large" severity={alertType}>
           {alertMessage}
         </Alert>
       </Snackbar>

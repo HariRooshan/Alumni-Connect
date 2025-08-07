@@ -12,7 +12,7 @@ const Footer = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={2} justifyContent="space-between" alignItems="center">
+        <Grid container spacing={2} alignItems="center">
           {/* PSG Tech logo and label */}
           <Grid item xs={12} md="auto" display="flex" alignItems="center">
             <img src="/PSG logo.jpeg" alt="PSG Logo" style={{ width: 60, height: 60, marginRight: 10 }} />
@@ -21,7 +21,16 @@ const Footer = () => {
             </Typography>
           </Grid>
 
-          
+          {/* Developer Info link centered */}
+          <Grid item xs={12} md>
+            <Box sx={{marginLeft:30}}>
+              <Typography variant="body1" fontWeight="bold">
+                <Link href="/developers-info" color="inherit" underline="hover">
+                  Developer Info
+                </Link>
+              </Typography>
+            </Box>
+          </Grid>
 
           {/* Privacy Policy and Terms */}
           <Grid item xs={12} md="auto">

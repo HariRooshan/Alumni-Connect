@@ -18,13 +18,13 @@ const developers = [
   {
     name: 'Hari Rooshan S S',
     department: 'IT',
-    email: 'kathir@gmail.com',
+    email: 'harirooshan007@gmail.com',
     linkedin: 'https://linkedin.com/in/kathir',
   },
   {
     name: 'Kathir P',
     department: 'IT',
-    email: 'sundar@gmail.com',
+    email: 'kathir@gmail.com',
     linkedin: 'https://linkedin.com/in/sundar',
   },
   {
@@ -37,31 +37,31 @@ const developers = [
   {
     name: 'Shriram B',
     department: 'IT',
-    email: 'vignesh@gmail.com',
+    email: 'shriram@gmail.com',
     linkedin: 'https://linkedin.com/in/vignesh',
   },
   {
     name: 'Kalaisidharth P',
     department: 'It',
-    email: 'divya@gmail.com',
+    email: 'kalaisidharth@gmail.com',
     linkedin: 'https://linkedin.com/in/divya',
-  },
-  {
-    name: 'Nandha Eswar C M',
-    department: 'It',
-    email: 'priya1@gmail.com',
-    linkedin: 'https://linkedin.com/in/priya1',
   },
   {
     name: 'Chaandhanu M G',
     department: 'IT',
-    email: 'manoj@gmail.com',
+    email: 'chaandhanu@gmail.com',
     linkedin: 'https://linkedin.com/in/manoj',
+  },
+  {
+    name: 'Nandha Eswar C M',
+    department: 'It',
+    email: 'nandhaeswar@gmail.com',
+    linkedin: 'https://linkedin.com/in/priya1',
   },
   {
     name: 'Nitin S',
     department: 'IT',
-    email: 'lavanya@gmail.com',
+    email: 'nitin@gmail.com',
     linkedin: 'https://linkedin.com/in/lavanya',
   },
 ];
@@ -106,7 +106,7 @@ const DeveloperInfo = () => {
                 <PersonIcon fontSize="large" />
               </Avatar>
 
-              <CardContent sx={{ textAlign: 'center', flexGrow: 1, pb: 0 }}>
+              <CardContent sx={{ textAlign: 'center', flexGrow: 1 }}>
                 <Typography variant="h6" fontWeight="bold">
                   {dev.name}
                 </Typography>
