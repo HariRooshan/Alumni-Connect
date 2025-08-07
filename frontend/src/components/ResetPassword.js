@@ -14,6 +14,11 @@ const ResetPassword = () => {
 
   const token = new URLSearchParams(location.search).get("token");
 
+  const isStrongPassword = (pwd) => {
+    // At least 8 chars, one uppercase, one lowercase, one digit, one special char
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pwd);
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError("");
@@ -21,6 +26,13 @@ const ResetPassword = () => {
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      setError(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+      );
       return;
     }
 

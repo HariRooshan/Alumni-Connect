@@ -32,6 +32,7 @@ import RegistrationForm from "./components/Mentorship/RegistrationForm.jsx";
 import Main from "./components/Mentorship/Main.jsx";
 import AdminPage from "./components/AdminPage";
 import MentorshipChat from "./components/Mentorship/Chat.jsx";
+import DeveloperInfo from "./components/DevelopersInfo.js";
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function AppWithNavBar() {
     }
   }, [location.pathname]); // Runs on route change
 
-  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery"];
+  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery","/developers-info"];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -72,6 +73,7 @@ function AppWithNavBar() {
           <Route path="/admin-approval" element={<AdminApproval />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact-us" element={<ContactUs />} />
+          <Route path="/developers-info" element={<DeveloperInfo />} />
           <Route element={<ProtectedRoute />}>
           <Route path="/view-profile" element={<ViewProfile />} />
           <Route path="/update-profile" element={<UpdateProfile />} />
