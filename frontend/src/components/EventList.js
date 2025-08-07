@@ -253,9 +253,6 @@ const EventList = () => {
                   📞 Contact
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Phone:</strong> {contact.phone}
-                </Typography>
-                <Typography variant="body2">
                   <strong>Email:</strong> {contact.email}
                 </Typography>
               </Box>

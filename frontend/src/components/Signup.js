@@ -125,7 +125,7 @@ const SignupForm = ({ role, emailDomain }) => {
                   />
                   <TextField
                     fullWidth
-                    label="Email"
+                    label={role?.toLowerCase() === "alumni" ? "Personal Email ID" : "Email"}
                     variant="outlined"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -149,6 +149,15 @@ const SignupForm = ({ role, emailDomain }) => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
+                  {/* Password strength condition */}
+                  <Typography
+                    variant="caption"
+                    color="textSecondary"
+                    align="left"
+                    sx={{ mt: -1, mb: 1 }}
+                  >
+                    Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.
+                  </Typography>
                 </>
               ) : (
                 <TextField
