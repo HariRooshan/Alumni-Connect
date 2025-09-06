@@ -7,6 +7,9 @@ import { Event, PhotoLibrary, People, ContactMail, Home as HomeIcon } from "@mui
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // Import for decoding token
 
+
+// demo change 4
+
 export default function AdminHome() {
   const navigate = useNavigate();
   const [openSnackbar, setOpenSnackbar] = useState(false);
