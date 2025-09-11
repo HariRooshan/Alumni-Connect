@@ -33,6 +33,7 @@ import Main from "./components/Mentorship/Main.jsx";
 import AdminPage from "./components/AdminPage";
 import MentorshipChat from "./components/Mentorship/Chat.jsx";
 import DeveloperInfo from "./components/DevelopersInfo.js";
+import AIAssistant from "./components/AIAssistant.js";
 
 function App() {
   return (
@@ -52,7 +53,7 @@ function AppWithNavBar() {
     }
   }, [location.pathname]); // Runs on route change
 
-  const showNavbarOn = ["/", "/view-profile","/mentorship" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery","/developers-info"];
+  const showNavbarOn = ["/", "/view-profile","/mentorship", "/ai-assistant" ,"/login", "/choosesignup","/contact-us","/forgot-password", "/reset-password", "/update-profile", "/events", "/search-alumni", "/gallery","/developers-info"];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -74,6 +75,7 @@ function AppWithNavBar() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/developers-info" element={<DeveloperInfo />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route element={<ProtectedRoute />}>
           <Route path="/view-profile" element={<ViewProfile />} />
           <Route path="/update-profile" element={<UpdateProfile />} />

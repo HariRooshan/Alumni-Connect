@@ -14,6 +14,7 @@ const userRoutes = require("./routes/userRoutes");
 const connRoutes = require("./routes/connRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 // const eventRoutes= require("./routes/eventRoutes");
 
 const path = require("path");
@@ -47,6 +48,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/connections",connRoutes)
 app.use("/api/mail",emailRoutes);
 app.use("/api/chat",messageRoutes);
+app.use("/api/ai",aiRoutes);
 
 const server = http.createServer(app);
 
