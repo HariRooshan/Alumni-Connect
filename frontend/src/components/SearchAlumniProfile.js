@@ -19,11 +19,26 @@ import WorkIcon from '@mui/icons-material/Work';
       { key: "sector", label: "Sector" },
       { key: "higherStudies", label: "Higher Studies" },
       { key: "institutionName", label: "Institution" },
+      { key: "currentCompany", label: "Company" },           // <-- Add this
+      { key: "companyLocation", label: "Company Location" },
       { key: "job", label: "Job Title" },
       { key: "linkedinUrl", label: "LinkedIn" },
-      { key: "currentCompany", label: "Company" },           // <-- Add this
-      { key: "companyLocation", label: "Company Location" }, // <-- Add this
+       // <-- Add this
     ];
+    const columnWidths = {
+  name: 200,
+  email: 250,
+  yearOfGraduation:130,
+  programStudied: 180,
+  sector: 120,
+  higherStudies: 130,
+  institutionName: 400,
+  job: 400,
+  linkedinUrl: 800,
+  currentCompany: 180,
+  companyLocation: 200,
+  default: 140, // fallback
+};
     const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
     const [selectedPdfColumns, setSelectedPdfColumns] = useState(allColumns.map(col => col.key));
     const [data, setData] = useState([]); // Store all alumni data
@@ -138,7 +153,7 @@ import WorkIcon from '@mui/icons-material/Work';
     
       console.log("Search count:", updatedSearchCount);
     
-      if (updatedSearchCount >= 5) {
+      if (updatedSearchCount >= 10) {
         sendEmail(profile);
         setSearchCount(0);
         localStorage.setItem("searchCount", 0); // Reset after reaching threshold
@@ -154,7 +169,6 @@ import WorkIcon from '@mui/icons-material/Work';
       institutionName: "institutionName",
       location: "companyLocation",
       company: "currentCompany",
-       // For future backend support
     };
 
  const handleSearch = () => {
@@ -443,10 +457,7 @@ const downloadPDF = () => {
     alert("❌ Invalid session. Please log in again.");
     return;
   }
-  if (userRole !== "Alumni") {
-    alert("❌ Only alumni can download the PDF.");
-    return;
-  }
+  
   // Only include selected columns
   const selectedCols = allColumns.filter(col => selectedPdfColumns.includes(col.key));
   if (selectedCols.length === 0) {
@@ -459,17 +470,21 @@ const downloadPDF = () => {
   doc.setFont("helvetica", "normal");
   const tableColumn = selectedCols.map(col => col.label);
   const tableRows = filteredData.map((alumni) =>
-    selectedCols.map(col => {
-      if (col.key === 'linkedinUrl') {
-        const val = alumni[col.key] || "N/A";
-        if (val.length > 35) {
-          return val.slice(0, 32) + '...';
-        }
-        return val;
-      }
-      return alumni[col.key] || "N/A";
-    })
-  );
+  selectedCols.map((col) => {
+    const value = alumni[col.key];
+
+    if (col.key === 'linkedinUrl') {
+      if (!value || typeof value !== 'string') return "N/A";
+
+      // Insert newline every 40 characters to simulate wrap
+      return value.replace(/(.{40})/g, "$1\n");
+    }
+
+    return value || "N/A";
+  })
+);
+
+
   // Compact, clean, and centered style
   autoTable(doc, {
     head: [tableColumn],
@@ -798,23 +813,27 @@ return (
       </Button>
 </Box>
 
-    {/* Results Table */}
-    <TableContainer
-      component={Paper}
-      sx={{
-        mt: 3,
-        width: "95%",
-        maxHeight: 400,
-        overflowY: "auto",
-        overflowX: "auto",
-        margin: "auto",
-        boxShadow: 3,
-      }}
-    >
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            {allColumns.map((col) => (
+    
+    
+
+<Box sx={{ mt: 5, mb: 5 }}>
+  <TableContainer
+    component={Paper}
+    sx={{
+      width: "95%",
+      maxHeight: 400,
+      overflowY: "auto",
+      overflowX: "auto",
+      margin: "auto",
+      boxShadow: 3,
+    }}
+  >
+    <Table stickyHeader>
+      <TableHead>
+        <TableRow>
+          {allColumns.map((col) => {
+            const colWidth = columnWidths[col.key] || columnWidths.default;
+            return (
               <TableCell
                 key={col.key}
                 sx={{
@@ -822,46 +841,69 @@ return (
                   color: "white",
                   fontWeight: "bold",
                   textAlign: "center",
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  ...(col.key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  width: colWidth,
+                  minWidth: colWidth,
+                  maxWidth: colWidth,
                 }}
               >
                 {col.label}
               </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredData.length > 0 ? (
-            filteredData.map((alumni, index) => (
-              <TableRow key={index}>
-                {allColumns.map((col, idx) => (
-                  <TableCell
-                    key={idx}
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      ...(col.key === 'linkedinUrl' && { maxWidth: 120, minWidth: 80, width: 100 }),
-                    }}
-                  >
+            );
+          })}
+        </TableRow>
+      </TableHead>
+
+      <TableBody>
+        {filteredData.length > 0 ? (
+          filteredData.map((alumni, index) => (
+            <TableRow key={index}>
+              {allColumns.map((col, idx) => {
+                const colWidth = columnWidths[col.key] || columnWidths.default;
+
+                const commonStyles = {
+                  width: colWidth,
+                  minWidth: colWidth,
+                  maxWidth: colWidth,
+                };
+
+                const cellStyles =
+                  col.key === "linkedinUrl"
+                    ? {
+                        ...commonStyles,
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
+                      }
+                    : {
+                        ...commonStyles,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      };
+
+                return (
+                  <TableCell key={idx} sx={cellStyles}>
                     {alumni[col.key] || "N/A"}
                   </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={allColumns.length} sx={{ textAlign: "center" }}>
-                No results found
-              </TableCell>
+                );
+              })}
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={allColumns.length} sx={{ textAlign: "center" }}>
+              No results found
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Box>
+
+
 
     {/* PDF Column Selection Dialog */}
     <Dialog open={pdfDialogOpen} onClose={closePdfDialog}>
@@ -888,7 +930,7 @@ return (
       </DialogActions>
     </Dialog>
 
-    {userRole !== "Student" && (
+    {userRole !== "Student"&&userRole !== "Alumni" && (
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
         <Button
           variant="contained"
@@ -921,4 +963,5 @@ return (
 </Box>
 );
 }
+//
 export default SearchAlumniProfile;
