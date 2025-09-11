@@ -39,6 +39,7 @@ const Navbar = () => {
     { text: "Events", path: "/events" },
     { text: "Search Alumni", path: "/search-alumni" },
     { text: "Mentorship", path: "/mentorship" },
+    { text: "AI Assistant", path: "/ai-assistant" },
     { text: "Contact Us", path: "/contact-us" },
 
   ];
